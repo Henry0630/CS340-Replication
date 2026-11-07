@@ -1,0 +1,16 @@
+# Line endings: the repo is developed on Windows, but the container, the
+# reproducer scripts and the detectors run on Linux. Force LF for anything that
+# the shell or Docker reads, otherwise `reproduce.sh` fails with
+# "bad interpreter: /bin/bash^M".
+* text=auto
+*.sh   text eol=lf
+*.bash text eol=lf
+Dockerfile    text eol=lf
+.dockerignore text eol=lf
+*.go   text eol=lf
+*.mod  text eol=lf
+*.py   text eol=lf
+*.md   text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+*.csv  text eol=lf
