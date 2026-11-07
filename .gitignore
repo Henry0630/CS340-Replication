@@ -1,0 +1,39 @@
+# build / run outputs
+results/raw/
+*.log
+*.jsonl
+!repro/**/runs.jsonl
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# upstream clone (week 2+)
+dataset-upstream/
+
+# toolchain / go
+go/bin/
+go/pkg/
+*.test
+*.out
+
+# editors & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# containers / VMs
+*.qcow2
+*.vmdk
+*.ova
+
+# secrets
+.env
+*.pem
+
+# generated environment snapshots (docs/environment.md is the source of truth)
+results/env-*.md

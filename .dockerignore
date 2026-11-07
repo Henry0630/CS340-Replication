@@ -1,0 +1,9 @@
+.git
+.git*
+results/raw
+data/*.xlsx.bak
+dataset-upstream
+repro/**/runs.jsonl
+**/__pycache__
+*.md
+!docker/smoke/*.go
