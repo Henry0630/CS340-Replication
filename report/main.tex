@@ -1,0 +1,161 @@
+% CS340 Operating Systems -- replication report
+% Target paper: Tu et al., "Understanding Real-World Concurrency Bugs in Go", ASPLOS'19.
+%
+% The report cover comes from docs/cover_template.docx (exported as
+% report/cover.pdf). If report/cover.pdf is present it is inserted as page 1;
+% if it is missing the document still compiles without the cover.
+
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage[hidelinks]{hyperref}
+\usepackage{pdfpages}
+
+\newcommand{\eg}{e.g.}
+\newcommand{\ie}{i.e.}
+\newcommand{\etal}{et al.}
+
+\title{\bfseries Understanding Real-World Concurrency Bugs in Go:\\
+A Replication}
+\author{Group 5:\\
+辛相天 (1240006592) \\ 张歆海 (1240012291) \\ 谢昊桐 (1230022122) \\ 郭子嘉 (1240015875)}
+\date{2026-11-08}
+
+\begin{document}
+
+\IfFileExists{cover.pdf}{\includepdf[pages=1,pagecommand={}]{cover.pdf}}
+
+\maketitle
+\thispagestyle{empty}
+
+\begin{abstract}
+This report describes our replication of Tu \etal{}\cite{go-study}, the first
+empirical study of concurrency bugs in real Go programs. We re-derive the
+paper's statistics from the released dataset, re-run a subset of the bugs
+against Go's built-in detectors, and extend the study by asking whether
+Go~1.22's per-iteration loop-variable semantics removes the bug class the
+paper attributes to closures over shared loop variables.
+\end{abstract}
+
+\section{Introduction and Claims}
+
+\subsection{Problem}
+
+Go was designed for concurrent programming from the start: goroutines,
+channels and a small, uniform set of synchronisation primitives replaced the
+ad-hoc mix of threads, mutexes and condition variables that dominated
+server-side C and C++. The design rests on an explicit bet that
+\emph{message passing is safer than shared-memory synchronisation}, and the
+language gives programmers no way to reach into another goroutine's memory
+without a channel or an explicit lock. That bet shaped a decade of
+production Go code: Docker, Kubernetes, etcd, CockroachDB, gRPC and BoltDB
+all rely on it. But the bet is a hypothesis about \emph{how bugs arise},
+not a guarantee about how they are prevented, and Go's own idioms introduce
+failure modes that neither the C/C++ nor the Erlang/Java literature covers.
+
+\cite{go-study} was the first study to test that hypothesis empirically. It
+collected 171 concurrency bugs from six production Go programs, labelled
+each one along two independent axes --- \emph{cause} (shared-memory access
+versus message passing) and \emph{behaviour} (blocking versus non-blocking)
+--- and found that more than half of them are caused by problems specific to
+Go rather than by traditional shared-memory races. The practical question we
+replicate is therefore narrow and answerable: how much of that picture
+survives an independent re-derivation, and does the language's own recent
+semantic change close the largest identified bug class?
+
+\subsection{Claims}
+
+The four claims we test are stated, with the paper value and our value, in
+\texttt{docs/claims.md}; that file is the contract between the numbers and
+the text below, and no number appears in this report unless it appears
+there.
+
+\paragraph{C1 (pervasiveness and taxonomy).} Go concurrency bugs are
+pervasive in production Go code and require a two-dimensional taxonomy:
+171 bugs across six production programs, split 85 blocking / 86 non-blocking
+by behaviour and 105 shared-memory / 66 message-passing by cause.
+\paragraph{C2 (non-traditional causes).} Most of these bugs are not classic
+shared-memory races but Go-specific idioms --- misuse of Go libraries and
+goroutine/channel patterns --- so message passing is not automatically safer.
+\paragraph{C3 (fix quality).} The upstream fixes are frequently shallow:
+synchronisation is added without identifying the root cause, some fixes are
+incomplete, and a non-trivial fraction of the fixes introduce new bugs.
+\paragraph{C4 (detection gap).} Go's two built-in concurrency detectors
+miss most of these bugs; the deadlock detector fires on only two of the
+blocking bugs, and the race detector misses many non-blocking ones.
+
+\subsection{Scope}
+
+Our reproduction has two layers, mirroring the structure of the paper.
+
+\paragraph{L1 --- re-derive the statistics.} We parse the released dataset
+at a pinned upstream commit and recompute every table ourselves, then
+compare against the published numbers: the behaviour/cause taxonomy and
+application breakdown (paper Tables 5, 6, 7), the fix and detection
+statistics (Tables 9, 10, 11). We do not copy the paper's spreadsheet; the
+taxonomy and counting logic are re-implemented from the paper's
+definitions.
+
+\paragraph{L2 --- re-run the bugs.} We rebuild a subset of 15--20 selected
+bugs at their buggy commits, trigger each one, and re-measure what Go's
+built-in deadlock and race detectors report. This covers the paper's bug
+reproduction and detector evaluation (Tables 8 and 12, sections 5.3 and 6.3).
+
+\paragraph{Extension.} We change exactly one factor: the Go language
+version. The same bug is rebuilt under Go~1.21 and Go~1.22 to test whether
+the per-iteration loop-variable semantics introduced in Go~1.22 eliminate the
+"anonymous function" bug class the paper singles out.
+
+\section{Reproduction Setup}
+
+% TODO (weeks 2+): dataset pin and hash, host facts, Dockerfile, image digest,
+% Go version, GOMAXPROCS, CGO_ENABLED, runs per bug.
+\section{Results}
+
+% TODO (weeks 2+): L1 tables with paper-vs-ours deltas; L2 detection coverage.
+\section{Analysis of Discrepancies}
+
+% TODO (weeks 2+): every deviation, its cause, and whether it is a
+% reproduction artefact or an upstream-data artefact. See docs/deviations.md.
+\section{Extension}
+
+% TODO (weeks 2+): Go 1.21 vs 1.22 on the anonymous-function bug class.
+\section{Conclusion}
+
+% TODO (final week)
+
+\section*{Contribution Statement}
+
+All four members contributed to this work. The per-commit breakdown is
+recorded in \texttt{docs/weekly-log.md}, which lists, for every commit, the
+author, the date and the report section that commit produced material for.
+辛相天 implemented the dataset pipeline and re-derived Tables 5/6/7/9/10;
+张歆海 built and pinned the execution environment; 谢昊桐 rebuilt and
+re-ran the selected bugs for the L2 experiments; 郭子嘉 maintained the
+claims file, this report, and the contribution log. The individual
+extent of each contribution is verifiable from the git history: every commit
+carries the author's student ID and full name in its subject.
+
+\section*{AI Usage Statement}
+
+We used an AI coding assistant (an OpenClaw agent, whose underlying model is
+Claude) while preparing this repository. Its use was limited to drafting
+and editing the documentation and the report skeleton --- specifically
+\texttt{docs/team-division.md}, \texttt{docs/claims.md},
+\texttt{docs/weekly-log.md}, \texttt{CONTRIBUTING.md}, and the prose and
+structure of this report. All technical content was verified by the human
+members before being committed: every number that appears in this report was
+produced by the code in this repository (\texttt{make tables} for L1,
+\texttt{repro/} run logs for L2) and re-checked against the paper, and every
+experimental result, deviation and conclusion is owned by the member whose
+commit produced it. The AI assistant did not run the experiments, did not
+choose the reproduced bugs, and did not make claims about the paper that
+are not traceable to \texttt{docs/claims.md}.
+
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\end{document}
