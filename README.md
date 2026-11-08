@@ -99,10 +99,10 @@ make clean      # remove results/raw and __pycache__
 
 | Member | Student ID | Role |
 |---|---|---|
-| _TBD_ | _TBD_ | A — data pipeline & statistics |
+| 辛相天 | 1240006592 | A — data pipeline & statistics |
 | 张歆海 | 1240012291 | B — build & run environment (Docker, Go toolchain) |
-| _TBD_ | _TBD_ | C — bug reproduction & detector experiments |
-| _TBD_ | _TBD_ | D — analysis, report & presentation |
+| 谢昊桐 | 1230022122 | C — bug reproduction & detector experiments |
+| 郭子嘉 | 1240015875 | D — analysis, report & presentation |
 
 ## AI usage
 
