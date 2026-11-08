@@ -1,0 +1,8 @@
+app,Blocking,NonBlocking,SharedMemory,MessagePassing
+Docker,21,23,28,16
+Kubernetes,17,17,21,14
+etcd,21,16,18,19
+CockroachDB,12,16,23,5
+gRPC,11,12,12,11
+BoltDB,1,2,3,0
+Total,83,86,105,65

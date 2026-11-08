@@ -1,0 +1,8 @@
+cause,Add,Move,InstructionBypass,DataPrivate,Misc
+Traditional,27,4,5,10,0
+WaitGroup,3,2,1,0,0
+Anonymous,5,2,0,4,0
+SharedLib,1,2,1,0,2
+Chan,6,7,3,0,0
+MessagingLib,0,0,0,0,1
+Total,42,17,10,14,3

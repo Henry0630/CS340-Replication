@@ -1,0 +1,8 @@
+cause,Add,Move,Change,Remove,Misc
+Mutex,9,7,2,8,1
+Wait,0,1,0,2,1
+RWMutex,0,2,0,3,0
+Chan,15,1,5,4,4
+ChanWith,6,3,2,3,1
+MessagingLib,1,0,0,1,2
+Total,31,14,9,21,9
