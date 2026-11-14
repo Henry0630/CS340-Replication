@@ -26,7 +26,7 @@ every member's machine. If they differ, the counting logic is wrong.
 ## L2 — reproduction and detector experiments (measured)
 
 Measured 2026-11-14 by `docker/verify.sh` in CI; raw block:
-`results/ci/env-L2-20261114T1111Z.md`. Re-run: Actions → *environment* →
+`results/ci/env-L2-20261114T1116Z.md`. Re-run: Actions → *environment* →
 "Re-run all jobs".
 
 | Item | Value |
