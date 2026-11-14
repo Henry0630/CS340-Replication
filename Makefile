@@ -1,11 +1,12 @@
 PY ?= python
 
-.PHONY: help setup check tables env docker-build docker-smoke clean
+.PHONY: help setup check tables figures env docker-build docker-smoke clean
 
 help:
 	@echo "make setup         - fetch and verify the pinned dataset (data/bug_table.xlsx)"
 	@echo "make check         - verify the dataset hash"
 	@echo "make tables        - recompute Tables 5/6/7/9/10 and compare with the paper"
+	@echo "make figures       - regenerate report/figures/*.png from results/tables/*.csv"
 	@echo "make env           - print machine/toolchain facts for docs/environment.md"
 	@echo "make docker-build  - build the go1.22 experiment image"
 	@echo "make docker-smoke  - show uname/go version inside that image"
@@ -19,6 +20,9 @@ check:
 
 tables:
 	$(PY) scripts/parse_dataset.py
+
+figures:
+	$(PY) scripts/make_figures.py
 
 env:
 	$(PY) scripts/check_env.py
