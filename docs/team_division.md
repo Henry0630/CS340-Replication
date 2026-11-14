@@ -8,7 +8,7 @@ sentence that cites it in the report.
 
 | Role | Member | Student ID | Email | Scope |
 |---|---|---|---|---|
-| A — data pipeline & statistics | 辛相天 | 1240006592 | 1240006592@student.must.edu.mo | Parse the pinned upstream dataset, recompute Tables 5/6/7/9/10, and record every deviation from the paper in `docs/deviations.md`. |
+| A — data pipeline & statistics | 辛相天 | 1240006592 | 1240006592@student.must.edu.mo | Parse the pinned upstream dataset, recompute Tables 5/6/7/9/10, and record every deviation from the paper in `deviations.md` at the repository root. |
 | B — build & run environment | 张歆海 | 1240012291 | 1240012291@student.must.edu.mo | Dockerfile, Go toolchain pinning, `docs/environment.md`, `docs/env-setup.md`, `make env` / `make docker-build`. |
 | C — bug reproduction & detector experiments | 谢昊桐 | 1230022122 | 1230022122@student.must.edu.mo | Rebuild the 15–20 selected bugs at their buggy commits under `repro/`, trigger them, and re-measure detector coverage (paper 5.3, 6.3). |
 | D — analysis, report & presentation | 郭子嘉 | 1240015875 | 1240015875@student.must.edu.mo | `docs/claims.md`, `report/main.tex` + `report/refs.bib`, `docs/weekly-log.md`, `CONTRIBUTING.md`, final tagging and presentation. |
