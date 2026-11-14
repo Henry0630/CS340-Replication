@@ -136,10 +136,10 @@ What the graders' criterion (25 %) asks for, and where it lives:
 
 | Member | Student ID | Role |
 |---|---|---|
-| _TBD_ | _TBD_ | A — data pipeline & statistics |
+| 辛相天 | 124006592 | A — data pipeline & statistics |
 | 张歆海 | 1240012291 | B — build & run environment (Docker, Go toolchain) |
-| _TBD_ | _TBD_ | C — bug reproduction & detector experiments |
-| _TBD_ | _TBD_ | D — analysis, report & presentation |
+| 谢昊桐 | 1230022122 | C — bug reproduction & detector experiments |
+| 郭子嘉 | 124015875 | D — analysis, report & presentation |
 
 ## AI usage
 
