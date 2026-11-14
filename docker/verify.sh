@@ -63,6 +63,10 @@ echo
 build_image() {
   local base="$1" tag="$2" label="$3" log start end
   log="$(mktemp)"
+  # Pull explicitly: BuildKit keeps pulled base layers in its cache without
+  # registering them as images, so `docker image inspect` on the base tag would
+  # report no RepoDigests — and the digest is exactly what we need to pin.
+  docker pull "$base" >/dev/null 2>&1 || true
   echo "Building $tag from $base ..." >&2
   start=$(date +%s)
   if docker build --build-arg GO_IMAGE="$base" -t "$tag" . >"$log" 2>&1; then
@@ -71,13 +75,12 @@ build_image() {
     ok "build" "$tag from $base"
     echo "- build time (cold-ish): **$((end - start)) s**"
     echo "- image size: \`$(docker images "$tag" --format '{{.Size}}')\`"
-    local digest
-    digest="$(docker image inspect "$tag" --format '{{index .RepoDigests 0}}' 2>/dev/null)"
-    if [ -n "$digest" ]; then
-      echo "- base image digest: \`$(docker image inspect "$base" --format '{{index .RepoDigests 0}}' 2>/dev/null)\`"
-      echo "- built image ref: \`$digest\`"
+    local base_digest
+    base_digest="$(docker image inspect "$base" --format '{{index .RepoDigests 0}}' 2>/dev/null)"
+    if [ -n "$base_digest" ]; then
+      echo "- base image digest: \`$base_digest\`"
     else
-      echo "- base image digest: (no RepoDigests: image built locally, not pulled by tag)"
+      echo "- base image digest: **not available** (no RepoDigests; do not pin from this run)"
     fi
     echo
     echo "### $label — inside the container"
@@ -85,7 +88,8 @@ build_image() {
     docker run --rm "$tag" sh -c '
       uname -a
       go version
-      go env GOOS GOARCH GOVERSION GOMAXPROCS CGO_ENABLED GOTOOLCHAIN
+      go env GOOS GOARCH GOVERSION GOTOOLCHAIN
+      echo "GOMAXPROCS=$GOMAXPROCS CGO_ENABLED=$CGO_ENABLED"
       gcc --version | head -1
       head -2 /etc/os-release
     ' 2>&1 | sed 's/^/  /'
