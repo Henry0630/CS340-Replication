@@ -104,8 +104,8 @@ pdflatex main && bibtex main && pdflatex main && pdflatex main
 ```
 
 The figures are read from `report/figures/`; run `make figures` first if they
-are missing. A cover page can be placed at `report/cover.pdf` (exported from
-`docs/cover_template.docx`); the document compiles with or without it.
+are missing. A cover page is optional: place a PDF at `report/cover.pdf` and it
+becomes page 1; the document compiles with or without it.
 
 ## Credits and starting point
 
