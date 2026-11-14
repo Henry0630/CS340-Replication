@@ -24,12 +24,14 @@ Owner: A (`tables_check.md`, repository root on `a-dataset`).
 | Go version | older toolchain, 2015–2018 code | Go 1.22.4 (`golang:1.22.4-bookworm`) | one unified environment; old code may need API repairs, each recorded per bug |
 | Reproduction scale | authors re-ran 41 bugs (21 blocking, 20 non-blocking) | subset, target 15–20 bugs | limited time and manpower; the counting metrics of L1 are insensitive to scale |
 | Hardware | authors' machines | Linux container on a teammate's laptop (Intel Core 5 220H, 16 logical cores, 15.6 GB) | the metrics are counts, not throughputs; stated as a limitation |
-| Experiment image | n/a | `golang:1.22.4-bookworm` / `golang:1.21.13-bookworm`, `GOMAXPROCS=4`, `CGO_ENABLED=1`, `GOTOOLCHAIN=local` | the Dockerfile is the single pin; digest **pending** the first build |
+| Experiment image | n/a | `golang:1.22.4-bookworm` / `golang:1.21.13-bookworm`, both pinned by digest, `GOMAXPROCS=4`, `CGO_ENABLED=1`, `GOTOOLCHAIN=local` | the Dockerfile is the single pin; digests measured 2026-11-14 by `docker/verify.sh` in CI |
 
-**Image digest and kernel are still `pending`.** B's environment record marks
-the L2 rows unverified until the hand-off checklist (`docs/env-setup.md`) is
-returned by a machine that has Docker. No L2 environment number is written
-into the report before that happens.
+**The experiment images are built and measured.** B's environment record
+(`docs/environment.md`) holds the kernel, compiler, image digests, image sizes
+and build times, measured 2026-11-14 by `docker/verify.sh` in CI; the raw
+block is committed under `results/ci/`. What is still outstanding is the
+level-2 *runs*: no individual bug has been rebuilt at its pre-fix revision and
+triggered yet, so no detector coverage number exists on our side.
 
 ## D2 — Data-scope deviations (L1)
 

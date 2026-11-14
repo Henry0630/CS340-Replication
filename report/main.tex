@@ -213,9 +213,11 @@ operating-system dependent, so they must run on Linux.
 
 \begin{table}[h]
 \centering
-\caption{Execution environment. The level-2 rows are \emph{pending}: no image
-has been built and verified yet, and no level-2 number appears in this
-report until they are filled in.}
+\caption{Execution environment. The level-2 rows are \emph{measured}: the
+images were built and their toolchain recorded by \texttt{docker/verify.sh}
+in CI on 2026-11-14; the raw block is committed under \texttt{results/ci/}.
+No level-2 \emph{detector coverage} number appears in this report, because no
+individual bug has been rebuilt and triggered yet.}
 \label{tab:environment}
 \begin{tabular}{@{}p{0.26\textwidth}p{0.68\textwidth}@{}}
 \toprule
@@ -225,9 +227,14 @@ Level-1 host & Windows 11 build 10.0.26300, Intel Core 5 220H, 16 logical cores,
 Level-1 runtime & Python 3.11.15, standard library only \\
 Experiment image & \texttt{golang:1.22.4-bookworm} (Go~1.22) \\
 Extension image & \texttt{golang:1.21.13-bookworm} (Go~1.21) \\
-Base image digest & \emph{pending --- first build} \\
-Kernel (\texttt{uname -a}) & \emph{pending --- first build} \\
-Compiler (\texttt{gcc --version}) & \emph{pending --- first build} \\
+Measurement host & GitHub Actions \texttt{ubuntu-22.04}, 4 vCPU, Docker 28.0.4 (\texttt{overlay2}) \\
+Host OS / kernel & Ubuntu 22.04.5 LTS, \texttt{Linux 6.8.0-1070-azure x86\_64} \\
+Container OS & Debian GNU/Linux 12 (bookworm) \\
+Base image, main & \texttt{0c02666907338370\allowbreaka3272af1b4642a18\allowbreak4968911d2317f0bd\allowbreak010dcef89a081d6f} (tag \texttt{golang:1.22.4-bookworm}) \\
+Base image, control & \texttt{c6a5b9308b3f3095\allowbreake8fde83c8bf4d68b\allowbreakd101fce606c1a0a1\allowbreak394522542509dda9} (tag \texttt{golang:1.21.13-bookworm}) \\
+Image size / build time & 944\,MB, 34\,s cold and 19\,s warm (Go~1.22); 934\,MB, 32\,s cold and 17\,s warm (Go~1.21) \\
+Compiler (\texttt{gcc --version}) & \texttt{gcc (Debian 12.2.0-14) 12.2.0} \\
+Race detector & verified: the build-time smoke test reports \texttt{DATA RACE} \\
 \texttt{GOMAXPROCS} & 4, fixed in the \texttt{Dockerfile} \\
 \texttt{CGO\_ENABLED} & 1 (the race detector requires cgo) \\
 \texttt{GOTOOLCHAIN} & \texttt{local}, so the image's own toolchain is used \\
@@ -466,11 +473,11 @@ of 20 reproduced non-blocking bugs when each is run 100 times (Table~12).
 The race detector therefore detects exactly half of that sample; it is not
 accurate to say that it misses more than half of it.
 
-We report no detector coverage of our own. The candidate selection and the
-reproducer contract are complete, but no bug has been built and triggered
-yet, because the experiment image has not been built and verified on a
-machine with Docker. Until that is done, quoting a coverage figure would be
-an estimate presented as a measurement.
+We report no detector coverage of our own. The experiment environment is ready
+and measured (Table~\ref{tab:environment}), and the candidate selection and
+the reproducer contract are complete, but no individual bug has been rebuilt
+at its pre-fix revision and triggered yet. Until that is done, quoting a
+coverage figure would be an estimate presented as a measurement.
 
 One discrepancy is already visible in the upstream annotations and is
 recorded now rather than later: the commit-backed inventory marks 19
@@ -671,9 +678,10 @@ fixes introduce new bugs. No experiment in this repository measures those
 properties.
 \item It cannot establish a failure probability for Go constructs. The
 55.6\,\% non-traditional share is a property of one dataset of 169 records.
-\item It cannot isolate the effect of the Go version. Until both images are
-built and pinned by digest, the extension's single-variable claim is
-unverified.
+\item It cannot isolate the effect of the Go version. Both images are built
+and pinned by digest, so the one-variable setup is in place, but no bug has
+been run under both toolchains, so the extension's single-variable claim
+remains untested.
 \item The extension's outcome is unknown. It may well show that only the
 loop-capture subset of anonymous-function bugs is fixed.
 \end{itemize}

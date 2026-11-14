@@ -199,15 +199,17 @@ completed runs — no run in this repository has yet produced a detector result.
 
 **Verdict: inconclusive on our side.** The paper's detection gap is
 established in the paper; our own coverage is **not yet measured**. The
-candidate selection and the reproducer contract are complete, but no bug has
-been built and triggered, because the experiment image has not been built and
-verified on a machine with Docker. We therefore quote the paper's detector
-numbers as the paper's, and state plainly that our coverage is unmeasured.
+candidate selection and the reproducer contract are complete, and the
+experiment environment is built and measured (see `docs/environment.md`,
+measured 2026-11-14 by `docker/verify.sh` in CI), but no individual bug has
+been rebuilt at its pre-fix revision and triggered yet. We therefore quote the
+paper's detector numbers as the paper's, and state plainly that our coverage
+is unmeasured.
 Quoting a coverage figure of our own before that happens would be an estimate
 presented as a measurement.
 
-**Status.** L2 — pending. C's run logs under `repro/*/logs` are the only
-accepted source.
+**Status.** L2 — pending (environment ready, runs outstanding). C's run logs
+under `repro/*/logs` are the only accepted source.
 
 ## Extension — does Go 1.22 close the loop-variable bug class?
 
