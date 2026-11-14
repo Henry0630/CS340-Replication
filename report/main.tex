@@ -143,9 +143,15 @@ anonymous-function bug class the paper singles out.
 
 \subsection{Starting code}
 
+Table~\ref{tab:starting} sets out the starting point of the
+reproduction: the pinned upstream artefact, the commit it is taken from, and
+which files we wrote rather than modified.
+
+
 \begin{table}[h]
 \centering
 \caption{Starting point of the reproduction.}
+\label{tab:starting}
 \begin{tabular}{@{}ll@{}}
 \toprule
 Item & Value \\
@@ -194,6 +200,10 @@ inline strings, and stable byte-for-byte CSV output.
 
 \subsection{Host and toolchain}
 
+Table~\ref{tab:environment} records the environment in which the
+numbers were produced.
+
+
 Level-1 statistics depend only on the Python standard library and are
 therefore identical on every member's machine; \texttt{make tables} completes
 in under two seconds. The level-2 experiments are a different matter: hang
@@ -205,6 +215,7 @@ operating-system dependent, so they must run on Linux.
 \caption{Execution environment. The level-2 rows are \emph{pending}: no image
 has been built and verified yet, and no level-2 number appears in this
 report until they are filled in.}
+\label{tab:environment}
 \begin{tabular}{@{}ll@{}}
 \toprule
 Item & Value \\
@@ -617,12 +628,17 @@ reproducible from the pinned input by a single command.
 
 \subsection{Setup deviations}
 
+Table~\ref{tab:deviations} lists every deviation from the
+paper\textquotesingle s setup.
+
+
 Beyond the dataset, the report must record the setting differences between
 the paper and our study.
 
 \begin{table}[h]
 \centering
 \caption{Setup deviations from the paper.}
+\label{tab:deviations}
 \begin{tabular}{@{}p{0.16\textwidth}p{0.22\textwidth}p{0.24\textwidth}p{0.24\textwidth}@{}}
 \toprule
 Item & Paper setup & Our setup & Reason \\

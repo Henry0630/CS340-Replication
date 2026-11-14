@@ -21,6 +21,7 @@ this table together, so every line here must correspond to a real commit.
 | 2 | 2026-11-14 | 郭子嘉 (D) | `report: reduce claims to three with verdicts and add figures` | Claims, Results, Analysis of Discrepancies |
 | 2 | 2026-11-14 | 郭子嘉 (D) | `meta: document starting code, workloads and build commands` | Reproduction Setup |
 | 2 | 2026-11-14 | 郭子嘉 (D) | `report: make paper-vs-ours comparison legible in figures` | Results |
+| 2 | 2026-11-14 | 郭子嘉 (D) | `report: number and cross-reference the remaining tables` | Reproduction Setup, Analysis of Discrepancies |
 
 ## Scope note on the week-1 data pipeline
 
