@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CS340 第 2 周分工</title>
+<style>
+@page { size: A4; margin: 16mm 14mm; }
+* { box-sizing: border-box; }
+body {
+  font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif;
+  font-size: 10.5pt; line-height: 1.62; color: #1a1a1a; margin: 0 auto;
+  max-width: 980px; padding: 18px 22px 40px; background: #fff;
+}
+h1 { font-size: 21pt; margin: 0 0 4px; letter-spacing: .5px; }
+h1 + p { color: #555; margin-top: 0; }
+h2 { font-size: 14pt; margin: 26px 0 8px; padding-bottom: 4px;
+     border-bottom: 2px solid #1f4e79; color: #1f4e79; page-break-after: avoid; }
+h3 { font-size: 12pt; margin: 18px 0 6px; color: #1f4e79; page-break-after: avoid; }
+p { margin: 7px 0; }
+hr { border: 0; border-top: 1px solid #dcdcdc; margin: 22px 0; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0 14px; font-size: 9.5pt;
+        page-break-inside: avoid; }
+th, td { border: 1px solid #c9d6e3; padding: 5px 7px; text-align: left; vertical-align: top; }
+th { background: #eef3f8; font-weight: 600; }
+tbody tr:nth-child(even) td { background: #fafcfe; }
+ul, ol { margin: 6px 0 10px; padding-left: 22px; }
+li { margin: 3px 0; }
+code { background: #f3f4f6; padding: 1px 4px; border-radius: 3px;
+       font-family: Consolas, "Courier New", monospace; font-size: 9.5pt; color: #b5304a; }
+pre { background: #f7f8fa; border-left: 3px solid #1f4e79; padding: 9px 12px;
+      overflow-x: auto; page-break-inside: avoid; }
+pre code { background: none; color: #24292f; padding: 0; font-size: 9.5pt; }
+blockquote { margin: 10px 0; padding: 6px 12px; border-left: 3px solid #c9d6e3; color: #555; }
+strong { color: #12324f; }
+a { color: #1f4e79; }
+@media print { body { padding: 0; max-width: none; } h1 { font-size: 19pt; } }
+</style></head>
+<body>
+<h1>第 2 周分工（11/9 – 11/15 23:59）</h1>
+<p><strong>本周唯一目标</strong>：四块地基各长出&quot;真东西&quot;——数据表逐格核对完、环境镜像真构建过、第一批复现器跑起来、报告骨架能编译。</p>
+<p><strong>本周的硬事实</strong>（截至 11/14 19:20）：仓库里目前只有 B 的 7 条提交，A/C/D 本周 <strong>0 提交</strong>。距离检查还有约 <strong>28 小时</strong>，每人至少要留下 1 条实质提交，否则这一周记空白（漏了不可补）。</p>
+<table>
+<thead><tr><th>角色</th><th>成员</th><th>本周交付</th></tr></thead>
+<tbody>
+<tr><td>A 数据与统计</td><td>xxt（学号 <code>&lt;学号&gt;</code>）</td><td>5 张表逐格核对 + deviations 表 + 追查缺失的 2 个 BoltDB bug</td></tr>
+<tr><td>B 环境与可复现</td><td>张歆海 1240012291</td><td>镜像在 CI 与<strong>本机</strong>各构建一次 + 环境表填满 + digest 钉死（已完成，只剩本机复测）</td></tr>
+<tr><td>C 复现实验</td><td>待定</td><td>10 个候选 bug + <strong>3 个能稳定触发的复现器</strong></td></tr>
+<tr><td>D 报告与统筹</td><td>待定</td><td>加 collaborator + 角色表填名 + weekly-log + Introduction 英文初稿</td></tr>
+</tbody></table>
+<hr>
+<h2>时间线</h2>
+<table>
+<thead><tr><th>时间</th><th>动作</th></tr></thead>
+<tbody>
+<tr><td>今天（周六）晚</td><td>D 把另外三人加进 collaborator（不然后面全阻塞）；各自开始动手</td></tr>
+<tr><td>周六 23:00</td><td>每人本地 <code>git commit</code> 完成，群里报一句</td></tr>
+<tr><td>周日 12:00</td><td>全部 push（先 <code>git pull --rebase</code>）</td></tr>
+<tr><td>周日 21:30</td><td>开 PR / 合并；确认 <code>main</code> 能跑</td></tr>
+<tr><td><strong>周日 23:59</strong></td><td>助教检查</td></tr>
+</tbody></table>
+<p>分支：<code>a-dataset</code>、<code>b-env</code>、<code>c-repro</code>、<code>d-report</code>。提交信息：<code>&lt;scope&gt;: &lt;改了什么&gt; (学号 姓名)</code>。</p>
+<hr>
+<h2>A — xxt（数据与统计）</h2>
+<p><strong>目标</strong>：把&quot;论文的每个数字&quot;变成&quot;仓库里能指到的一行&quot;，并且把对不上的地方解释清楚。</p>
+<h3>要交的文件</h3>
+<table>
+<thead><tr><th>文件</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td><code>docs/tables_check.md</code></td><td><strong>新建</strong>：Paper vs Ours 逐格对照（Table 5/6/7/9/10），每格标 ✅ / ⚠️</td></tr>
+<tr><td><code>docs/deviations.md</code></td><td><strong>新建</strong>：deviations 表（条目 / 论文设置 / 我们的设置 / 原因）</td></tr>
+<tr><td><code>results/tables/*.csv</code></td><td>由 <code>scripts/parse_dataset.py</code> 生成，<strong>首次入库</strong>（目前只在 B 的机器上未跟踪）</td></tr>
+<tr><td><code>docs/table_mapping.md</code></td><td>复核列号（重点：Table 6 的 <code>Wait</code> = <code>wait related</code> + <code>WaitGroup</code> 两列相加）</td></tr>
+</tbody></table>
+<h3>步骤</h3>
+<ol>
+<li>clone 仓库，跑 <code>python scripts/fetch_dataset.py --check</code> → <code>python scripts/parse_dataset.py</code>，确认输出 <code>blocking=83 non-blocking=86 total=169</code>。</li>
+<li>打开论文 PDF 的 Table 5/6/7/9/10，逐格填进 <code>docs/tables_check.md</code>：论文值、我们的值、差值、判定。</li>
+<li>对 4 处 ⚠️ 写原因（现有线索见 <code>docs/claims.md</code> 的 C1/C2）：</li>
+</ol>
+<ul>
+<li>blocking 83 vs 85（BoltDB 少 2 条）</li>
+<li>Mutex 27 vs 28、Chan-with 15 vs 16（同一条原因）</li>
+<li>message passing 65 vs 66</li>
+<li><code>kubernetes#11298</code> 同时标了 shared 和 message（+1 抵消了 −1）</li>
+</ul>
+<ol>
+<li><strong>追查缺失的 2 条</strong>：在 BoltDB 仓库的 commit 历史里搜 <code>392</code>、<code>240</code>、<code>deadlock</code>、<code>lock</code>，看能不能找到对应的修复补丁并补进分析；找不到就写明搜索范围和结论。</li>
+<li><code>docs/deviations.md</code> 写 4 条：Go 版本、复现规模（15–20 个 vs 41 个）、实验主机（GitHub runner）、数据集缺 2 条。</li>
+</ol>
+<h3>验收标准</h3>
+<ul>
+<li>干净机器 <code>python scripts/parse_dataset.py</code> 五秒内出结果，与入库 CSV 一致；</li>
+<li><code>docs/tables_check.md</code> 每格都有论文值、我们的值、判定；</li>
+<li>每个 ⚠️ 都有可验证的原因，不是&quot;可能存在差异&quot;这种空话。</li>
+</ul>
+<h3>提交</h3>
+<pre><code class="lang-">dataset: verify all recomputed tables cell by cell (&lt;学号&gt; xxt)
+dataset: add deviations table and BoltDB gap analysis (&lt;学号&gt; xxt)</code></pre>
+<hr>
+<h2>B — 张歆海 1240012291（环境与可复现）</h2>
+<p><strong>目标</strong>：把实验环境钉成一个可重建的镜像，并且<strong>至少有两次独立构建的实测数据</strong>。</p>
+<h3>本周已完成（不用重做，只需知道现状）</h3>
+<table>
+<thead><tr><th>项</th><th>状态</th></tr></thead>
+<tbody>
+<tr><td><code>Dockerfile</code>（base 镜像按 <strong>digest</strong> 钉死，go1.22.4 / go1.21.13 两版）</td><td>✅ 已入库</td></tr>
+<tr><td><code>.github/workflows/env.yml</code>：干净 Ubuntu runner 上构建 + 冒烟测试 + 把测量结果提交回仓库</td><td>✅ 已跑通两次，产物在 <code>results/ci/</code></td></tr>
+<tr><td><code>docker/verify.sh</code>：一条命令测出内核/Go/gcc/digest/体积/构建耗时/<code>-race</code> 是否生效</td><td>✅ 已入库</td></tr>
+<tr><td><code>docs/environment.md</code>：L2 表已按实测填满</td><td>✅</td></tr>
+<tr><td><code>README</code>：预期输出与运行时间、可复现性对照表</td><td>✅</td></tr>
+</tbody></table>
+<h3>本周剩余（今天做完）</h3>
+<ol>
+<li>Docker Desktop 装完并重启后，本机跑一次 <code>bash docker/verify.sh</code>，把输出存成 <code>results/local/env-L2-&lt;主机名&gt;.md</code>；</li>
+<li><code>docs/environment.md</code> 增加一行&quot;本机（Windows 11 + Docker Desktop）&quot;的实测结果，作为第二个独立环境；</li>
+<li>对比两次结果：Go/gcc/镜像大小应完全一致，内核与构建耗时不同——把差异写进 deviations（这是<strong>证据</strong>，不是问题）。</li>
+</ol>
+<h3>验收标准</h3>
+<ul>
+<li><code>bash docker/verify.sh</code> 在本机通过，且 <code>results/local/</code> 里有实测文件；</li>
+<li><code>docs/environment.md</code> 里两个宿主机的数字都对得上 <code>results/</code> 里的原始产物；</li>
+<li>助教只看 README + environment.md 就能重建镜像，不需要问人。</li>
+</ul>
+<h3>提交</h3>
+<pre><code class="lang-">env: record a second independent build on the local Docker host (1240012291 张歆海)</code></pre>
+<hr>
+<h2>C — 待定（复现实验）</h2>
+<p><strong>目标</strong>：从 169 个 bug 里挑出 10 个可做的，并把其中 3 个真正跑起来。</p>
+<h3>要交的文件</h3>
+<table>
+<thead><tr><th>文件</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td><code>repro/candidates.md</code></td><td><strong>新建</strong>：10 个候选，每个写 6 项（仓库+commit、BugID、论文症状、触发方式、工作量、风险）</td></tr>
+<tr><td><code>repro/&lt;app&gt;-&lt;id&gt;/</code></td><td><strong>新建至少 3 个目录</strong>：<code>README.md</code> + <code>reproduce.sh</code> + <code>notes.md</code></td></tr>
+<tr><td><code>docs/claims.md</code></td><td>复核 C1–C4 措辞；C4 的&quot;数据集标 19/23，论文写 21/20&quot;必须保留</td></tr>
+</tbody></table>
+<h3>步骤</h3>
+<ol>
+<li>读论文 §4（方法）、§5.3、§6.3，记住两个协议：blocking bug 要 <strong>3/3 次触发</strong>；race 检测器跑 <strong>100 次</strong>算命中。</li>
+<li>打开 <code>results/tables/bug_inventory.csv</code>（A 会入库；没有就先跑 <code>python scripts/parse_dataset.py</code> 生成），按三条规则筛：<code>reproduced_flag = 1</code>、<code>patch_size_lines ≤ 10</code>、症状是&quot;挂住不退出&quot;（可用 timeout 判定）。挑 10 个，至少覆盖 3 个仓库。</li>
+<li>挑最简单的 3 个写复现器：</li>
+</ol>
+<ul>
+<li><code>reproduce.sh</code> 契约：退出码 0 = 复现到 bug，1 = 没复现，2 = 构建失败；</li>
+<li>跑法：<code>docker run --rm -v &quot;$PWD/repro/&lt;bug&gt;:/work&quot; -w /work cs340-repro:go1.22 ./reproduce.sh</code>；</li>
+<li>每次运行往 <code>runs.jsonl</code> 追加一行（<code>{&quot;bug&quot;:..., &quot;run&quot;:n, &quot;verdict&quot;:..., &quot;wall_s&quot;:...}</code>）。</li>
+</ul>
+<ol>
+<li>如果本机没有 Docker：用 Codespaces（仓库里已有 <code>.devcontainer/</code>，开箱带 Docker），或在 CI 里加一个 <code>repro</code> 工作流——两条路都可以，但要在 PR 里说明用的是哪条。</li>
+</ol>
+<h3>验收标准</h3>
+<ul>
+<li>3 个复现器能稳定给出判定（blocking 类 3/3 触发）；</li>
+<li>每个复现器有 <code>notes.md</code> 记录&quot;相对论文改了什么&quot;（Go 版本不兼容时的改法必须写清）；</li>
+<li><code>repro/candidates.md</code> 里 10 个候选都能在 <code>bug_inventory.csv</code> 里查到对应 commit。</li>
+</ul>
+<h3>提交</h3>
+<pre><code class="lang-">repro: shortlist 10 candidates from the dataset inventory (&lt;学号&gt; &lt;姓名&gt;)
+repro: add 3 working reproducers for blocking bugs (&lt;学号&gt; &lt;姓名&gt;)</code></pre>
+<hr>
+<h2>D — 待定（报告与统筹）</h2>
+<p><strong>目标</strong>：把仓库变成&quot;四个人的仓库&quot;，并把报告骨架填到能编译、能读。</p>
+<h3>要交的文件</h3>
+<table>
+<thead><tr><th>文件</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>GitHub 仓库设置</td><td>加 3 个 collaborator（<strong>今天必须做，否则别人推不上来</strong>）</td></tr>
+<tr><td><code>docs/team_division.md</code></td><td>角色表填真实姓名 + 学号</td></tr>
+<tr><td><code>README.md</code></td><td>Team 表补齐四人</td></tr>
+<tr><td><code>docs/weekly-log.md</code></td><td><strong>新建</strong>：日期 / 成员 / 提交摘要 / 对应报告章节</td></tr>
+<tr><td><code>report/main.tex</code></td><td>Introduction 英文初稿 + Setup 骨架（引用 <code>docs/environment.md</code> 与 deviations 表）</td></tr>
+</tbody></table>
+<h3>步骤</h3>
+<ol>
+<li>Settings → Collaborators → 邀请另外三人；建四条分支。</li>
+<li>填角色表与 README Team 表（A 是 xxt，B 是张歆海 1240012291，C/D 填认领的人）。</li>
+<li><code>report/main.tex</code>：Introduction 三段——problem（Go 的并发模型与&quot;消息传递更安全&quot;的信念）、claims（C1–C4 各一句）、scope（L1 全表 + L2 15–20 个 bug + Extension）。能编译成 PDF 即可。</li>
+<li><code>docs/weekly-log.md</code> 补第 1 周与第 2 周的记录（第 1 周：B 的 5 条提交；第 2 周：按实际填）。</li>
+</ol>
+<h3>验收标准</h3>
+<ul>
+<li>周日 12:00 前，四个人的提交都能在 <code>main</code> 上看到；</li>
+<li><code>report/main.tex</code> 编译通过（Overleaf 或本地）；</li>
+<li>weekly-log 与 <code>git log</code> 对得上（这是 contribution statement 的证据）。</li>
+</ul>
+<h3>提交</h3>
+<pre><code class="lang-">meta: invite collaborators and fill the role table (&lt;学号&gt; &lt;姓名&gt;)
+report: add introduction draft and weekly log (&lt;学号&gt; &lt;姓名&gt;)</code></pre>
+<hr>
+<h2>文件归属表（<code>git add</code> 前对一下）</h2>
+<table>
+<thead><tr><th>文件 / 目录</th><th>归属</th></tr></thead>
+<tbody>
+<tr><td><code>scripts/parse_dataset.py</code>、<code>scripts/fetch_dataset.py</code>、<code>results/tables/</code>、<code>docs/table_mapping.md</code>、<code>docs/tables_check.md</code>、<code>docs/deviations.md</code></td><td>A</td></tr>
+<tr><td><code>Dockerfile</code>、<code>docker/</code>、<code>.dockerignore</code>、<code>.gitattributes</code>、<code>.devcontainer/</code>、<code>.github/workflows/</code>、<code>.gitignore</code>、<code>docs/environment.md</code>、<code>docs/env-setup.md</code>、<code>scripts/check_env.py</code>、<code>Makefile</code>、<code>results/ci/</code>、<code>results/local/</code></td><td>B</td></tr>
+<tr><td><code>docs/claims.md</code>、<code>repro/</code></td><td>C</td></tr>
+<tr><td><code>docs/plan.md</code>、<code>docs/team_division.md</code>、<code>docs/week1_tasks.md</code>、<code>docs/week2_tasks.md</code>、<code>CONTRIBUTING.md</code>、<code>report/</code>、<code>docs/weekly-log.md</code>、README 的 Team 表</td><td>D</td></tr>
+</tbody></table>
+<p><strong>不要 <code>git add .</code></strong>：B 之前一次 <code>git add -A results</code> 差点把 A 的 CSV 带进自己的提交里，已经回滚了。</p>
+<hr>
+<h2>风险与兜底</h2>
+<table>
+<thead><tr><th>风险</th><th>处理</th></tr></thead>
+<tbody>
+<tr><td>到今天还没加 collaborator</td><td>D 现在做，10 分钟；不加则 A/C/D 全部推不上来</td></tr>
+<tr><td>C 没有 Docker 环境</td><td>Codespaces（<code>.devcontainer/</code> 已就绪）或让 B 的机器代跑</td></tr>
+<tr><td>A 追不到那 2 个 BoltDB bug</td><td>写明搜索范围与结论，作为 limitation，不硬凑</td></tr>
+<tr><td>某人今天做不完</td><td><strong>提前说</strong>，由搭档接手并在 PR 描述里写清&quot;谁做了什么&quot;；不要让本周空着</td></tr>
+<tr><td>代理/网络导致 push 失败</td><td>B 已给 git 配了&quot;仅 github.com 走 127.0.0.1:7890 代理&quot;；直连不通时先确认代理开着</td></tr>
+</tbody></table>
+</body></html>

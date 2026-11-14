@@ -56,7 +56,10 @@ Measured 2026-11-14 by `docker/verify.sh` in CI; raw block:
    and commits the measured block to `results/ci/`.
 2. **GitHub Codespaces:** open the repo → *Code* → *Codespaces* → create; the
    devcontainer installs Docker-in-Docker, then run `bash docker/verify.sh`.
-3. **Your own machine with Docker:** `bash docker/verify.sh` (Linux containers).
+3. **Your own machine with Docker:** `make verify` (= `bash docker/verify.sh
+   --out results/local/env-L2-<host>.md`). Commit the file under `results/local/`;
+   kernel and build times will differ from the CI row, Go/gcc/image digest must
+   not.
 
 ## Environment decision log
 

@@ -7,6 +7,7 @@
 #   ./docker/verify.sh            # builds go1.22 + go1.21, then measures
 #   ./docker/verify.sh --quick    # only go1.22 (skips the extension image)
 #   ./docker/verify.sh --no-build # measure existing images only
+#   ./docker/verify.sh --out results/local/env-L2-$(hostname).md   # save the block
 #
 # Everything printed is measured on the spot. Nothing is guessed: if a step
 # fails, it prints "FAILED: <cmd>" and the block says so, so nobody can paste an
@@ -22,15 +23,22 @@ TAG22="cs340-repro:go1.22"
 TAG21="cs340-repro:go1.21"
 MODE="full"
 BUILD=1
+OUT=""
 
 for arg in "$@"; do
   case "$arg" in
     --quick) MODE="quick" ;;
     --no-build) BUILD=0 ;;
+    --out) shift; OUT="${1:-}" ;;
     -h|--help) sed -n '2,15p' "$0"; exit 0 ;;
     *) echo "unknown option: $arg" >&2; exit 2 ;;
   esac
 done
+
+if [ -n "$OUT" ]; then
+  mkdir -p "$(dirname "$OUT")"
+  exec > >(tee "$OUT") 2>&1
+fi
 
 fail() { echo "- $1: **FAILED** ($2)"; }
 ok()   { echo "- $1: \`$2\`"; }
@@ -159,5 +167,5 @@ echo
 echo "1. Paste the sections above into \`docs/environment.md\` (L2 table)."
 echo "2. Copy the *base image digest* into the comment block at the top of the \`Dockerfile\`,"
 echo "   then pin \`ARG GO_IMAGE=golang@sha256:...\`."
-echo "3. Commit with: \`env: record measured L2 environment and pin image digest (1240012291 张歆海)\`"
+echo "3. Commit with: \`env: record a second independent build on the local Docker host (1240012291 张歆海)\`"
 echo "4. Expected runtimes live in the README: use the build times above."
