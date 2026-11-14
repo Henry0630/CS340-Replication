@@ -46,8 +46,9 @@ we show that every difference from the paper's published tables is explained
 by exactly two documented causes: two issue-only rows that carry no commit
 hash, and one record that carries two cause labels where the paper assigns
 one. Under the paper's own assignment convention our recomputation matches
-paper Tables~5, 6 and~7 cell by cell. Level-2 detector coverage is not yet
-measured and is reported as such.
+paper Tables~5, 6 and~7 cell by cell, and Tables~9 and~10 match without
+qualification. Level-2 detector coverage is not yet measured and is reported
+as such.
 \end{abstract}
 
 \section{Introduction and Claims}
@@ -78,39 +79,45 @@ semantic change close the largest identified bug class?
 
 \subsection{Claims}
 
-The four claims we test are stated, with the paper value and our value, in
-\texttt{docs/claims.md}; that file is the contract between the numbers and
-the text below, and no number appears in this report unless it appears
+We test \emph{three} claims, each linked to the paper table that motivates
+it. The full contract between the numbers and the prose is
+\texttt{docs/claims.md}; no number appears in this report unless it appears
 there.
 
-\paragraph{C1 (pervasiveness and taxonomy).} Go concurrency bugs are
-pervasive in production Go code and require a two-dimensional taxonomy:
-171 bugs across six production programs, split 85 blocking / 86 non-blocking
-by behaviour and 105 shared-memory / 66 message-passing by cause. Our
-commit-backed scope covers 169 of those 171 records; the two excluded rows
-and every difference from the published tables are accounted for in
-\S\ref{sec:discrepancies}.
+\paragraph{Claim 1 (pervasiveness and taxonomy; paper Table~5 and
+Table~6).} Go concurrency bugs are pervasive in production Go code and
+require a two-dimensional taxonomy: 171 bugs across six production programs,
+split 85 blocking / 86 non-blocking by behaviour and 105 shared-memory /
+66 message-passing by cause. Our commit-backed scope covers 169 of those 171
+records; the two excluded rows and every difference from the published tables
+are accounted for in \S\ref{sec:discrepancies}.
+\emph{Verdict: supported.} The taxonomy reproduces.
 
-\paragraph{C2 (non-traditional causes).} Most of these bugs are not classic
-shared-memory races but Go-specific idioms --- misuse of Go libraries and
-goroutine/channel patterns --- so message passing is not automatically safer.
+\paragraph{Claim 2 (non-traditional causes and their fixes; paper Table~9,
+Table~7 and Table~10).} Most of these bugs are not classic shared-memory
+races but Go-specific idioms --- misuse of Go libraries and goroutine/channel
+patterns --- so message passing is not automatically safer; and fix
+strategies vary with bug causes, a bug's cause usually determining which
+synchronisation primitive its fix adjusts.
+\emph{Verdict: supported for the counts, and deliberately not extended.} The
+non-traditional majority and the cause-to-fix correlation both reproduce, but
+the fix-strategy tables do not establish that upstream fixes are shallow or
+that they introduce new bugs, and we do not assert that.
 
-\paragraph{C3 (fix strategies).} Fix strategies vary with bug causes: bugs
-whose cause involves a particular synchronisation primitive are usually fixed
-by adjusting that same primitive. This is a statement about the
-\emph{distribution} of fix strategies, and it is what our data supports.
-
-\paragraph{C4 (detection gap).} Go's two built-in concurrency detectors
-catch only a minority of the bugs they are aimed at. The paper reports the
-deadlock detector firing on 2 of 21 reproduced blocking bugs, and the race
-detector on 10 of 20 reproduced non-blocking bugs within 100 runs each ---
-exactly half of that sample. Our own coverage is not yet measured.
+\paragraph{Claim 3 (detection gap; paper Table~8 and Table~12).} Go's two
+built-in concurrency detectors catch only a minority of the bugs they are
+aimed at: the paper reports the deadlock detector firing on 2 of 21
+reproduced blocking bugs, and the race detector on 10 of 20 reproduced
+non-blocking bugs within 100 runs each --- exactly half of that sample.
+\emph{Verdict: inconclusive on our side.} Our own coverage is not yet
+measured, because no bug has been built and triggered; see
+\S\ref{sec:results}.
 
 \subsection{Scope}
 
 Our reproduction has two layers, mirroring the structure of the paper.
 
-\paragraph{L1 --- re-derive the statistics.} We parse the released dataset
+\paragraph{L1 --- re-derive the statistics.} The environment and the exact procedure are specified in \S\ref{sec:setup}. We parse the released dataset
 at a pinned upstream commit and recompute every table ourselves, then
 compare against the published numbers: the behaviour/cause taxonomy and
 application breakdown (paper Tables~5, 6, 7), the root-cause and fix-strategy
@@ -126,7 +133,7 @@ reproduction and detector evaluation (Tables~8 and~12, sections~5.3 and
 results in full and states the level-2 gap explicitly rather than filling it
 with estimates.
 
-\paragraph{Extension.} We change exactly one factor: the Go language
+\paragraph{Extension.} The protocol is stated in \S\ref{sec:extension}. We change exactly one factor: the Go language
 version. The same bug is rebuilt under Go~1.21 and Go~1.22 to test whether
 the per-iteration loop-variable semantics introduced in Go~1.22 eliminate the
 anonymous-function bug class the paper singles out.
@@ -134,30 +141,40 @@ anonymous-function bug class the paper singles out.
 \section{Reproduction Setup}
 \label{sec:setup}
 
-\subsection{Dataset}
-
-All level-1 numbers come from one pinned artifact.
+\subsection{Starting code}
 
 \begin{table}[h]
 \centering
-\caption{The pinned dataset and its identity.}
+\caption{Starting point of the reproduction.}
 \begin{tabular}{@{}ll@{}}
 \toprule
 Item & Value \\
 \midrule
-Artifact & \texttt{bug table.xlsx} \\
-Upstream repository & \texttt{system-pclub/go-concurrency-bugs} \\
+Upstream dataset & \texttt{system-pclub/go-concurrency-bugs} \\
 Pinned commit & \texttt{f2655063a2278cff64a51121b73801eda05fdcfa} \\
+Artefact used & \texttt{bug table.xlsx} (unmodified) \\
 SHA-256 & \texttt{a0e5f0103600b3c394b86cb975f403789366f0190312019fae648de0cd8e3235} \\
-Local copy & \texttt{data/bug\_table.xlsx}, unmodified \\
-Entries in the workbook & 171 \\
-Records in our inventory & 169 (83 blocking, 86 non-blocking) \\
+Licence & none stated upstream; redistributed unmodified with credit, for academic replication \\
+Files modified upstream & none --- the dataset is read-only input \\
+Files written by us & \texttt{scripts/}, \texttt{docs/}, \texttt{results/tables/}, \texttt{repro/}, \texttt{report/} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The fetcher verifies the workbook's checksum and never silently replaces a
-mismatched file; the parser runs offline and re-verifies the same checksum.
+The dataset is obtained by script, never by hand: \texttt{make setup} runs
+\texttt{scripts/fetch_dataset.py}, which downloads the pinned commit, verifies
+the checksum, and refuses to replace an existing file whose hash does not
+match. \texttt{make check} verifies without downloading. Every number in this
+report therefore comes from a pinned input that a clean checkout can obtain
+again with one command.
+
+\subsection{Dataset}
+
+All level-1 numbers come from that one artefact. The workbook holds 171 bug
+entries, of which 169 carry a 40-character commit hash and a matching
+released patch; the two exceptions are excluded from our inventory and
+explained in \S\ref{sec:discrepancies}.
+
 The parsing is implemented from scratch with the Python standard library only
 --- no spreadsheet library, no third-party package --- so the counts do not
 depend on how a given tool interprets a worksheet. Column positions are
@@ -192,7 +209,7 @@ report until they are filled in.}
 \toprule
 Item & Value \\
 \midrule
-Level-1 host & Windows 11, Intel Core 5 220H, 16 logical cores, 15.6\,GB \\
+Level-1 host & Windows 11 build 10.0.26300, Intel Core 5 220H, 16 logical cores, 15.6\,GB \\
 Level-1 runtime & Python 3.11.15, standard library only \\
 Experiment image & \texttt{golang:1.22.4-bookworm} (Go~1.22) \\
 Extension image & \texttt{golang:1.21.13-bookworm} (Go~1.21) \\
@@ -213,12 +230,34 @@ our extension experiment. The base image must ultimately be pinned by digest
 rather than by tag, so that an upstream retag cannot silently change what we
 ran.
 
+\subsection{Workloads}
+
+The workload of the level-1 experiment is the released dataset itself: 169
+bug records, obtained by the script above, and counted by a deterministic
+parser. Because the input is pinned and the parser is deterministic, the
+workload does not vary between runs, and this is what lets us report the
+level-1 statistics with a standard deviation of zero (see
+\S\ref{sec:results}).
+
+The workload of the level-2 experiment is the set of selected bugs. The
+selection rule is mechanical and recorded: from the inventory, take rows with
+\texttt{behavior=blocking}, \texttt{reproduced\_flag=1} and
+\texttt{patch\_size\_lines<=10}, which yields 14 entries; from those, a
+shortlist of ten spanning three repositories (Docker 2, etcd 4, gRPC 4) is
+chosen for short, explicit trigger paths. Each shortlisted bug records its
+repository, the full fixing commit and its first parent (the pre-fix
+revision), the inventory row it came from, the trigger, the oracle, and the
+known limits. The pre-fix source of all ten has been read at the recorded
+revision.
+
+These are verified source revisions, not verified runtime reproductions. The
+trigger designs are hypotheses until a run confirms them.
+
 \subsection{Protocol}
 
-Each reproduced bug is rebuilt at the commit that the dataset records as its
-fixing commit's first parent, which is the pre-fix revision. Each candidate
-carries a provenance record naming the repository, the full pre-fix and
-fixing commit hashes, the inventory row it came from, the exact trigger, the
+Each reproduced bug is rebuilt at the pre-fix revision identified above.
+Each candidate carries a provenance record naming the repository, the full
+pre-fix and fixing commit hashes, the inventory row, the exact trigger, the
 oracle used to decide whether the symptom occurred, and the known limits of
 the reproduction. The upstream checkout itself is not committed, and neither
 are binaries or raw logs; only the specification, the harness and a summary
@@ -235,7 +274,8 @@ number. An unlabelled run log is not a result.
 \subsection{Level 1: the taxonomy reproduces}
 
 Table~\ref{tab:t5} compares our recomputed taxonomy against the paper's
-published Table~5. The paper's columns are the behaviour split and the cause
+published Table~5, and Figure~\ref{fig:taxonomy} shows the same comparison
+graphically. The paper's columns are the behaviour split and the cause
 split; ours are computed from the pinned workbook.
 
 \begin{table}[h]
@@ -264,6 +304,16 @@ Total       & \textbf{85} & \textbf{83} & 86 & 86 & 105 & 105 & \textbf{66} & \t
 \end{tabular}
 \end{table}
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{figures/fig_taxonomy.png}
+\caption{Behaviour and cause counts per application, paper against ours.
+The only visible differences are in BoltDB (three rows excluded from our
+scope) and in Kubernetes' shared-memory column (one record the paper assigns
+to a single cause and we count twice).}
+\label{fig:taxonomy}
+\end{figure}
+
 Two observations matter. First, the shared-memory total is unchanged at 105
 even though two individual rows differ, because the two changes run in
 opposite directions and cancel at the total; a total-only comparison would
@@ -272,7 +322,8 @@ that the two causes in \S\ref{sec:discrepancies} predict, which is a
 stronger statement than agreement in aggregate.
 
 Table~\ref{tab:t6} gives the causes of blocking bugs, our recomputation of
-paper Table~6.
+paper Table~6, and Figure~\ref{fig:causes} shows the same data per
+application.
 
 \begin{table}[h]
 \centering
@@ -298,6 +349,15 @@ Total       & \textbf{27} & 5 & \textbf{4} & 29 & \textbf{15} & 4 & \textbf{85} 
 \end{tabular}
 \end{table}
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/fig_blocking_causes.png}
+\caption{Causes of blocking bugs per application. Ours (blue) and the
+published Table~6 (grey) differ in the Mutex and Chan-with-library columns
+of BoltDB and in the Wait column of Kubernetes.}
+\label{fig:causes}
+\end{figure}
+
 Our \texttt{Wait} column is one higher and our \texttt{Chan w/} column one
 lower than the paper's, for the reason given in \S\ref{sec:discrepancies}: one
 record carries both a \texttt{Wait} and a \texttt{Chan w/} cause, and the
@@ -309,7 +369,53 @@ For the non-blocking half of the study we reproduce the published Table~9
 (root causes) in \emph{all 42 cells} and the published Table~10 (fix
 strategies) in \emph{all 35 cells}, including both total rows. This is the
 part of the paper's dataset that carries no overlapping labels, and it
-reproduces without qualification.
+reproduces without qualification. Figure~\ref{fig:fixes} shows the
+distribution of fix strategies for blocking bugs, grouped by cause.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/fig_fix_strategies.png}
+\caption{Fix strategies for blocking bugs, grouped by cause. Each bar is
+split by the strategy the paper's Table~7 records, so a cause whose fixes
+cluster on one strategy is visible directly.}
+\label{fig:fixes}
+\end{figure}
+
+\subsection{Statistics and reproducibility}
+
+The level-1 experiment has no stochastic component: the input is pinned by
+commit and SHA-256, and the parser is deterministic. We nevertheless ran it
+three times to confirm that, and the six output CSVs are byte-identical
+across the three runs. The mean and standard deviation of every level-1
+number in this report are therefore
+
+\begin{center}
+\begin{tabular}{@{}lr@{}}
+\toprule
+Quantity & Mean $\pm$ s.d. over 3 runs \\
+\midrule
+Blocking bugs (ours) & $83.00 \pm 0.00$ \\
+Non-blocking bugs (ours) & $86.00 \pm 0.00$ \\
+Shared-memory labels (ours) & $105.00 \pm 0.00$ \\
+Message-passing labels (ours) & $65.00 \pm 0.00$ \\
+Non-traditional labels (ours) & $94.00 \pm 0.00$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+A zero standard deviation is the expected result here and is reported as
+such, rather than as a missing statistic: it is a statement that the level-1
+pipeline is reproducible, not a claim that no experiment was run. The
+three-run protocol and the mean $\pm$ s.d. format apply in full to the
+level-2 detector measurements, which are genuinely stochastic; those have not
+been run yet.
+
+Every number in this section is traceable to a file in the repository: the
+five tables are \texttt{results/tables/table5.csv}, \texttt{table6.csv},
+\texttt{table7.csv}, \texttt{table9.csv} and \texttt{table10.csv}, and the
+169-row record-level inventory behind them is
+\texttt{results/tables/bug\_inventory.csv}. The figures are regenerated from
+those same files by \texttt{scripts/make\_figures.py}.
 
 \subsection{Level 1: non-traditional causes}
 
@@ -323,11 +429,21 @@ shared-memory access is not the share of bugs that are non-traditional.
 Counting the workbook's own non-traditional label (column~L for blocking
 rows, column~H for non-blocking rows) over our 169 commit-backed records
 gives 54 of 83 blocking rows and 40 of 86 non-blocking rows, that is
-\textbf{94 of 169, or 55.6\,\%}, carrying a non-traditional label. This
-supports a majority claim \emph{within this dataset}. It does not establish
-a universal failure probability for Go constructs, and it is a supplementary
-workbook-label count rather than a column of the five published tables; the
-source coordinates travel with the number wherever it is used.
+\textbf{94 of 169, or 55.6\,\%}, carrying a non-traditional label
+(Figure~\ref{fig:nontrad}). This supports a majority claim \emph{within this
+dataset}. It does not establish a universal failure probability for Go
+constructs, and it is a supplementary workbook-label count rather than a
+column of the five published tables; the source coordinates travel with the
+number wherever it is used.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/fig_nontraditional.png}
+\caption{Non-traditional label share by behaviour. 94 of the 169
+commit-backed records carry a non-traditional label: 54 of 83 blocking rows
+and 40 of 86 non-blocking rows.}
+\label{fig:nontrad}
+\end{figure}
 
 \subsection{Level 2: not yet measured}
 
@@ -355,64 +471,148 @@ has reproduced anything.
 \section{Analysis of Discrepancies}
 \label{sec:discrepancies}
 
+\subsection{Claim verdicts}
+
+Table~\ref{tab:verdicts} summarises the verdict on each of the three claims we test, together with the evidence behind it. Every verdict is one of the four the report format asks for: supported, partially supported, not supported, or inconclusive.
+
+\begin{table}[h]
+\centering
+\caption{Verdict on each tested claim, with the evidence behind it.}
+\label{tab:verdicts}
+\begin{tabular}{@{}lp{0.26\textwidth}p{0.44\textwidth}@{}}
+\toprule
+Claim & Verdict & Evidence \\
+\midrule
+1. Taxonomy and pervasiveness &
+Supported &
+Our recomputation matches paper Table~5 for all six applications and
+Table~6 in all six cause columns under the paper's own assignment
+convention; the four differing cells are predicted exactly by the two
+documented causes. \\
+2. Non-traditional causes and their fixes &
+Supported for the counts, not extended &
+94 of 169 records (55.6\,\%) carry a non-traditional label, and Tables~7,
+~9 and~10 reproduce (Tables~9 and~10 in every cell). We do not assert fix
+quality, because nothing in our data measures it. \\
+3. Built-in detector coverage &
+Inconclusive on our side &
+The paper's 2/21 and 10/20 are established in the paper; our own coverage
+is unmeasured, since no bug has been built and triggered. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{The two causes of every difference}
+
 Every difference between our numbers and the paper's has one of two causes.
 Both are properties of the released workbook, not artefacts of our counting.
 
-\subsection{Two issue-only rows carry no commit}
-
-The workbook holds 171 bug entries. Two blocking rows have an issue ID where
-a commit hash should be:
-
-\begin{center}
-\begin{tabular}{@{}llll@{}}
-\toprule
-Sheet & Row & Issue ID & Cause \\
-\midrule
-blocking & 90 & \texttt{boltdb\#392} & \texttt{Mutex}, shared memory \\
-blocking & 92 & \texttt{boltdb\#240} & \texttt{Chan w/}, message passing \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-These rows are \emph{present} in the released workbook. They are not missing
-data and not an upstream omission; they are the two entries the artifact does
-not bind to a commit. Because we can only reproduce a bug we can check out,
-our inventory excludes them, which accounts for $-2$ blocking, $-1$
-shared-memory and $-1$ message-passing relative to the paper.
+\paragraph{Two issue-only rows carry no commit.} The workbook holds 171 bug
+entries. Two blocking rows have an issue ID where a commit hash should be:
+row 90, \texttt{boltdb\#392} (\texttt{Mutex}, shared memory), and row 92,
+\texttt{boltdb\#240} (\texttt{Chan w/}, message passing). These rows are
+\emph{present} in the released workbook. They are not missing data and not an
+upstream omission; they are the two entries the artifact does not bind to a
+commit. Because we can only reproduce a bug we can check out, our inventory
+excludes them.
 
 That exclusion is correct for our purpose, and it is also independently
 corroborated: these two issue IDs are exactly the two bugs that the paper's
 built-in deadlock detector reports. The paper did analyse them --- it simply
 did so through issue identifiers rather than through commits.
 
-\subsection{One record carries two cause labels}
-
-One included record, \texttt{kubernetes\#11298}, carries \emph{both} a
-shared-memory and a message-passing label, and \emph{both} a \texttt{Wait}
-and a \texttt{Chan w/} cause, in the released workbook. The paper assigns it
-a single cause: message passing. We retain both labels, because discarding a
-label that the dataset contains would be a silent correction of the source
-data, and the parser warns about the overlap rather than hiding it.
+\paragraph{One record carries two cause labels.} One included record,
+\texttt{kubernetes\#11298}, carries \emph{both} a shared-memory and a
+message-passing label, and \emph{both} a \texttt{Wait} and a \texttt{Chan w/}
+cause, in the released workbook. The paper assigns it a single cause: message
+passing. We retain both labels, because discarding a label that the dataset
+contains would be a silent correction of the source data, and the parser
+warns about the overlap rather than hiding it.
 
 This single record explains the remaining differences: $+1$ shared-memory
 label for Kubernetes, $+1$ \texttt{Wait} cause, and the corresponding $-1$ in
 the \texttt{Chan w/} column of the blocking-cause table and in the
 \texttt{Chan w/} / \texttt{Remove} cell of the fix-strategy table.
 
-\subsection{The two causes account for every difference}
+\subsection{Gaps: absolute and relative differences}
 
-The point of attributing differences individually is that they can be checked
-against the paper's own tables rather than merely asserted. Under the
-paper's assignment convention --- include the two issue-only rows, and give
-\texttt{kubernetes\#11298} one cause --- our recomputation reproduces
-paper Table~5 cell by cell for all six applications, paper Table~6 in all
-six cause columns, and paper Table~7 in every cell. Tables~9 and~10 match
-under either convention.
+Table~\ref{tab:gaps} quantifies every gap, in absolute counts and relative
+to the paper's value.
 
-We still report the commit-backed numbers as our primary result, because
-those are the ones backed by a commit we can actually check out and rebuild.
-The reconciliation is a consistency argument, not a licence to present
-counts we cannot reproduce.
+\begin{table}[h]
+\centering
+\caption{Every gap between the paper's published values and ours, with
+absolute and relative differences. Relative differences are taken against the
+paper's value.}
+\label{tab:gaps}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Quantity & Paper & Ours & Absolute & Relative \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{Table 5 --- taxonomy}} \\
+Blocking bugs (total)      & 85 & 83 & $-2$ & $-2.35\,\%$ \\
+Non-blocking bugs (total)  & 86 & 86 & 0   & 0\,\% \\
+Shared-memory labels       & 105 & 105 & 0  & 0\,\% \\
+Message-passing labels     & 66 & 65 & $-1$ & $-1.52\,\%$ \\
+BoltDB blocking bugs       & 3 & 1 & $-2$ & $-66.7\,\%$ \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{Table 6 --- blocking causes}} \\
+Mutex assignments          & 28 & 27 & $-1$ & $-3.57\,\%$ \\
+RWMutex assignments        & 5 & 5 & 0 & 0\,\% \\
+Wait assignments           & 3 & 4 & $+1$ & $+33.3\,\%$ \\
+Chan assignments           & 29 & 29 & 0 & 0\,\% \\
+Chan-with-library assign.  & 16 & 15 & $-1$ & $-6.25\,\%$ \\
+Messaging-library assign.  & 4 & 4 & 0 & 0\,\% \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{Table 7 --- blocking fix strategies}} \\
+Mutex / Misc               & 2 & 1 & $-1$ & $-50.0\,\%$ \\
+Wait / Remove              & 1 & 2 & $+1$ & $+100\,\%$ \\
+Chan w/ / Remove           & 4 & 3 & $-1$ & $-25.0\,\%$ \\
+all other cells            & --- & --- & 0 & 0\,\% \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{Tables 9 and 10 --- non-blocking causes and fixes}} \\
+all 42 cells of Table 9    & --- & --- & 0 & 0\,\% \\
+all 35 cells of Table 10   & --- & --- & 0 & 0\,\% \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{Supplementary count}} \\
+Non-traditional labels     & --- & 94 of 169 & --- & $55.6\,\%$ \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{Reproduced flags (upstream annotation, not our run)}} \\
+Blocking flagged reproduced & 21 & 19 & $-2$ & $-9.52\,\%$ \\
+Non-blocking flagged reproduced & 20 & 23 & $+3$ & $+15.0\,\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The two largest relative differences are the three-cell change in the
+BoltDB blocking count and the \texttt{Wait} assignments, and both are
+artefacts of the two causes above rather than of any counting difference: a
+row that is included in one scope and not the other, and a row that carries
+two cause labels where the paper assigns one. The large percentages on
+single-digit cells (for example \texttt{Wait}/\texttt{Remove}, $+100\,\%$)
+reflect a base of one or two records and should not be read as a
+substantive change; that is precisely why the cell-level account in
+\texttt{docs/deviations.md} is given alongside the percentages.
+
+\subsection{Evidence: controlled checks rather than assertion}
+
+Two checks support the explanation above, and both are reproducible from the
+repository.
+
+First, a controlled re-derivation. Under the paper's assignment convention
+--- include the two issue-only rows, and give \texttt{kubernetes\#11298} one
+cause --- our recomputation reproduces paper Table~5 cell by cell for all
+six applications, paper Table~6 in all six cause columns, and paper Table~7
+in every cell. The model is therefore not a correction fitted to the paper;
+it is the only assignment consistent with the paper's own tables and with
+§5.3. We still report the commit-backed numbers as our primary result,
+because those are the ones backed by a commit we can actually check out and
+rebuild. The reconciliation is a consistency argument, not a licence to
+present counts we cannot reproduce.
+
+Second, a determinism check. The level-1 pipeline was run three times and
+produced byte-identical CSVs, so every level-1 number in this report is
+reproducible from the pinned input by a single command.
 
 \subsection{Setup deviations}
 
@@ -439,6 +639,27 @@ Detector protocol & 1 run per blocking bug, 100 per non-blocking bug & same,
 \end{tabular}
 \end{table}
 
+\subsection{Limitations}
+
+What this reproduction cannot demonstrate, stated plainly:
+
+\begin{itemize}
+\item It cannot demonstrate the detector gap (Claim 3). The paper's numbers
+are quoted; ours are unmeasured. No bug has been built and triggered.
+\item It cannot demonstrate anything about fix \emph{quality}. Our level-1
+data shows which strategy was used for which cause; it cannot show that
+developers misidentified a root cause, that fixes are incomplete, or that
+fixes introduce new bugs. No experiment in this repository measures those
+properties.
+\item It cannot establish a failure probability for Go constructs. The
+55.6\,\% non-traditional share is a property of one dataset of 169 records.
+\item It cannot isolate the effect of the Go version. Until both images are
+built and pinned by digest, the extension's single-variable claim is
+unverified.
+\item The extension's outcome is unknown. It may well show that only the
+loop-capture subset of anonymous-function bugs is fixed.
+\end{itemize}
+
 \subsection{Claims we deliberately do not make}
 
 Two claims that would have been easy to write are withheld because the
@@ -461,16 +682,25 @@ Go's tooling.
 \section{Extension}
 \label{sec:extension}
 
-\subsection{Hypothesis}
+\subsection{Question and motivation}
 
 The paper observes that some non-blocking bugs are caused by anonymous
 functions that capture a loop variable shared across iterations. Go~1.22
 changed the semantics of \texttt{for} loops: each iteration now receives its
 own variables, subject to the language version selected for the module
-\cite{go122,loopvar}. That change postdates the 2019 paper, so it is not a
-claim the paper makes and not a result we may claim until we have run it.
+\cite{go122,loopvar}.
 
-\subsection{Protocol}
+The motivation for testing it is that the paper's bug class is a
+\emph{language-semantics} class. If the semantics changed in the direction the
+paper's diagnosis suggests, the class should shrink; if it did not, then the
+paper's implicit assumption --- that the closure over a shared loop variable
+is the root cause --- would be only part of the story. Either outcome
+sharpens the reading of the paper's Section 6.1.
+
+That change postdates the 2019 paper, so it is not a claim the paper makes and
+not a result we may claim until we have run it.
+
+\subsection{Design}
 
 We change exactly one factor, the Go language version, and hold everything
 else fixed: the same source revision, the same trigger, the same workload,
@@ -490,6 +720,15 @@ changed:
 \item the base image and compiler differences, recorded rather than assumed.
 \end{enumerate}
 
+\subsection{Result}
+
+\emph{Not yet obtained.} The extension requires the experiment environment to
+be built and verified first, and that has not happened. We therefore state
+the hypothesis and the protocol, and report no outcome. The candidate set for
+this experiment will be drawn from the anonymous-function bug class in the
+inventory, and the result will be interpreted with respect to the paper's
+claim about that class.
+
 \subsection{Scope of the hypothesis}
 
 The hypothesis is narrow on purpose: the new loop-variable semantics should
@@ -502,18 +741,22 @@ than claiming the bug class is closed.
 
 \section{Conclusion}
 
-We set out to re-derive the statistics of the first empirical study of Go
-concurrency bugs and to ask whether Go~1.22 closes the loop-variable bug
-class. On the first half, the replication succeeds. Over the 169
-commit-backed records of the pinned dataset we recover 83 blocking and 86
-non-blocking bugs and 105 shared-memory and 65 message-passing labels, we
-reproduce paper Tables~9 and~10 in every cell, and we account for every
-remaining difference with two documented properties of the released
-workbook. The 94 of 169 records carrying a non-traditional label, 55.6\,\%,
-independently support the paper's central qualitative finding that Go's own
-idioms, not classical shared-memory races, are the majority cause of Go
-concurrency bugs --- and that message passing is therefore not the safer
-choice it is often assumed to be.
+\textbf{Overall verdict: partially reproduced.} The paper's level-1
+statistics are reproduced exactly under the paper's own assignment
+convention, with every difference traced to two documented properties of the
+released dataset, while the level-2 detector measurements and the extension
+remain unmeasured.
+
+On the first half, the replication succeeds. Over the 169 commit-backed
+records of the pinned dataset we recover 83 blocking and 86 non-blocking bugs
+and 105 shared-memory and 65 message-passing labels, we reproduce paper
+Tables~9 and~10 in every cell, and we account for every remaining difference
+with two documented properties of the released workbook. The 94 of 169
+records carrying a non-traditional label, 55.6\,\%, independently support the
+paper's central qualitative finding that Go's own idioms, not classical
+shared-memory races, are the majority cause of Go concurrency bugs --- and
+that message passing is therefore not the safer choice it is often assumed
+to be.
 
 Two things are worth stating plainly rather than leaving to be inferred.
 First, the numbers in this report are only as good as their provenance, and
@@ -532,12 +775,29 @@ hypothesis --- is not yet done. The candidate selection, the reproducer
 contract and the environment specification are in place, but no bug has been
 built and triggered and the experiment image is not yet built and verified.
 We therefore report no detector coverage of our own, and the extension is
-stated as a protocol rather than as a finding. The next step is the
-environment hand-off: build both images on a Linux host, pin the base image
-by digest, record the kernel and compiler versions, and only then produce
-the first reproducer logs. Everything downstream --- our own coverage
-numbers, the detector comparison, and the Go~1.22 result --- becomes
-quotable at that point and not before.
+stated as a protocol rather than as a finding.
+
+\subsection{Lessons learned}
+
+Three things are worth carrying to the next replication.
+
+First, \emph{scope differences masquerade as counting errors}. Our first
+draft described the two excluded BoltDB rows as bugs "missing from the
+released dataset", which is wrong: they are present, and their commit cells
+hold issue identifiers. The difference between those two descriptions is the
+difference between an upstream-data artefact and a mistake on our side, and
+only the first can be defended.
+
+Second, \emph{a matching total can hide mismatching cells}. Our
+shared-memory count agreed with the paper's to the bug, and the agreement was
+produced by two row-level errors cancelling. Checking totals alone would
+have passed the comparison and reported a wrong mechanism.
+
+Third, \emph{reproducing a study means reproducing its data scope before its
+numbers}. The single most valuable step in this replication was not the
+parser but the decision to ask, cell by cell, which single assignment of the
+doubly-labelled record reproduces the paper's own tables. That turned three
+unexplained discrepancies into two explained ones.
 
 \section*{Contribution Statement}
 
@@ -556,7 +816,9 @@ Where a member's work spans roles, the weekly log records who wrote the
 code rather than only who owns the analysis: the pinned-data fetcher and
 offline parser were implemented by 谢昊桐 as a cross-role prerequisite at
 the team's request, while the statistical scope and the deviations register
-remain 辛相天's.
+remain 辛相天's. The figures in this report are generated from the committed
+CSVs by a script in \texttt{scripts/}, so every plotted number is traceable
+to the same files as the tables.
 
 \section*{AI Usage Statement}
 
@@ -566,10 +828,10 @@ members reported in their own records.
 
 An OpenClaw coding agent assisted with the documentation and report work
 under 郭子嘉's direction: the role table, the contribution log, the claims
-file, and the prose and structure of this report. Codex assisted 谢昊桐 with
-the data scripts and their tests, the inspection of upstream source, the
-candidate selection, the reproducer specification, and the drafting of the
-review documents.
+file, the figure script, and the prose and structure of this report. Codex
+assisted 谢昊桐 with the data scripts and their tests, the inspection of
+upstream source, the candidate selection, the reproducer specification, and
+the drafting of the review documents.
 
 The use of these tools was limited to writing and editing text and code.
 Every technical content in this report was verified by the human members

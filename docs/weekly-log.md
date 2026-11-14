@@ -18,6 +18,7 @@ this table together, so every line here must correspond to a real commit.
 | 1 | 2026-11-08 | 郭子嘉 (D) | `report: add introduction draft and weekly log` | Introduction |
 | 2 | 2026-11-14 | 郭子嘉 (D) | `docs: reconcile claims with review and record deviations` | Claims, Deviations |
 | 2 | 2026-11-14 | 郭子嘉 (D) | `report: fill setup, results, discrepancy and extension sections` | Reproduction Setup, Results, Analysis of Discrepancies, Extension |
+| 2 | 2026-11-14 | 郭子嘉 (D) | `report: reduce claims to three with verdicts and add figures` | Claims, Results, Analysis of Discrepancies |
 
 ## Scope note on the week-1 data pipeline
 

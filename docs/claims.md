@@ -1,11 +1,23 @@
 # Claims
 
 The contract between the numbers and the report. Every claim states what the
-paper claims, what we measured, and where a deviation is explained. Nobody
-quotes a number that is not in this file.
+paper claims, what we measured, where the deviation is explained, and what
+verdict the evidence supports. Nobody quotes a number that is not in this
+file.
 
 Paper: Tu, Liu, Song, Zhang. *Understanding Real-World Concurrency Bugs in Go.*
 ASPLOS'19. <https://songlh.github.io/paper/go-study.pdf>
+
+This file states **three** claims, each linked to the paper table or figure
+that motivates it. The week-1 review by C (role C) addressed four provisional
+claims numbered C1--C4; the mapping to the three claims used here is recorded
+in each claim's heading, so that review remains traceable:
+
+| Review claim | Claim here | Paper table or figure |
+|---|---|---|
+| C1 | Claim 1 | Table 5 (taxonomy), Table 6 (blocking causes) |
+| C2, C3 | Claim 2 | Table 9 (non-blocking root causes), Table 7 and Table 10 (fix strategies) |
+| C4 | Claim 3 | Table 8 (deadlock detector), Table 12 (race detector) |
 
 ## Data scope — read this before any number
 
@@ -54,7 +66,9 @@ found (§5.3). Their causes — one `Mutex`, one `Chan w/` — are exactly the
 two cells Table 6 needs to gain. The paper model is therefore not a fudge
 factor; it is the only assignment consistent with the paper's own tables.
 
-## C1 — Go concurrency bugs are pervasive, and they need a taxonomy
+## Claim 1 — Go concurrency bugs are pervasive, and they need a taxonomy
+
+*(review claim C1; paper Table 5, Table 6)*
 
 **Paper.** The first empirical study of Go concurrency bugs. 171 bugs in six
 production-grade Go programs (Docker, Kubernetes, gRPC, CockroachDB, etcd,
@@ -84,19 +98,28 @@ Net effect: shared memory is unchanged at 105 because the +1 and the −1
 cancel; message passing is −1 because only the excluded BoltDB row is
 message-passing. Full cell-by-cell account in `docs/deviations.md`.
 
-**Status.** L1 done (A's statistical scope; the pinned-data pipeline was
-implemented by C in commit `1b3e968`). Reproduced except for the two
-issue-only BoltDB rows, which the paper's artifact also does not resolve to a
-commit.
+**Verdict: supported.** The taxonomy reproduces. The four differing cells are
+exactly the cells the two documented causes predict, and under the paper's own
+assignment convention our recomputation matches Table 5 for all six
+applications and Table 6 in all six cause columns. We did not reproduce the
+paper's *scope* of 171 commits, because two of those rows carry no commit; the
+taxonomy itself is confirmed.
 
-## C2 — Most of these bugs are not classic shared-memory races
+**Status.** L1 done (A's statistical scope; the pinned-data pipeline was
+implemented by C in commit `1b3e968`).
+
+## Claim 2 — Most of these bugs are not classic shared-memory races, and their fixes vary with their causes
+
+*(review claims C2 and C3; paper Table 9, Table 7, Table 10)*
 
 **Paper.** More than half of the 171 bugs are not traditional shared-memory
 races but problems specific to Go's own concurrency idioms — misuse of Go
 libraries, goroutine and channel misuse, and similar. The paper therefore
 answers the long-running "message passing vs. shared memory" debate for Go:
-message passing is *not* automatically safer, because Go-specific idioms fail
-in their own ways.
+message passing is *not* automatically safer. Separately, the paper finds a
+high correlation between a bug's cause and the strategy used to fix it: bugs
+whose cause involves a particular synchronisation primitive are usually fixed
+by adjusting that same primitive.
 
 **Ours (L1).** The non-traditional label is a *separate* classification from
 the shared-memory / message-passing cause axis, and the two must not be
@@ -117,31 +140,8 @@ Reproduce with the standard-library parser, no third-party packages:
 python -c "import sys; sys.path.insert(0, 'scripts'); from parse_dataset import read_sheets, parse_bugs, DATASET_PATH; bugs=parse_bugs(read_sheets(DATASET_PATH)); print({kind:sum(b.flag('L' if kind=='blocking' else 'H') for b in bugs if b.behavior==kind) for kind in ('blocking','non-blocking')})"
 ```
 
-**What this supports.** A majority claim *within this dataset*: roughly 56 % of
-the commit-backed bugs are labelled non-traditional, which reproduces the
-paper's central qualitative finding that Go-specific idioms are a major source
-of concurrency bugs.
-
-**What this does not support.** It is not a universal failure probability for
-Go constructs, and it is not the same quantity as the shared-memory share. The
-five CSV tables carry no dedicated traditional / non-traditional column, so
-this count is a supplementary workbook-label count; its source coordinates
-(blocking column L, non-blocking column H) must accompany the report wherever
-the number is used.
-
-**Status.** L1 done.
-
-## C3 — Fix strategies vary with bug causes
-
-**Paper.** The paper studies how the bugs were fixed and finds a high
-correlation between the cause of a bug and the strategy used to fix it: bugs
-whose causes involve a particular synchronisation primitive are usually fixed
-by adjusting that same primitive. For blocking bugs, around 90 % are fixed by
-adjusting synchronisation primitives and the average patch is small (6.8
-lines); for non-blocking bugs, about 69 % are fixed by restricting timing.
-
-**Ours (L1).** We reproduce the fix-strategy tables with the paper's own
-category definitions and no reinterpretation:
+For the fix strategies we reproduce the paper's own category definitions and
+no reinterpretation:
 
 - **Table 10** (non-blocking fix strategies) matches the paper in **all 35
   cells**, including the total row.
@@ -151,20 +151,30 @@ category definitions and no reinterpretation:
   assignments* from 20 distinct records, because the doubly-labelled
   `kubernetes#11298` contributes to two cause rows.
 
-**What this supports.** Fix strategies do vary with bug causes, and the
-correlation is reproducible from the released artifact.
+**Verdict: supported for the counts, and deliberately not extended.** The
+non-traditional majority reproduces at 55.6 %, and the cause-to-fix-strategy
+correlation reproduces in Tables 7 and 10. Two boundaries are enforced. First,
+55.6 % is a majority claim *within this dataset*: it is not a universal
+failure probability for Go constructs, and it is not the same quantity as the
+shared-memory share. The five CSV tables carry no dedicated traditional /
+non-traditional column, so this count is a supplementary workbook-label count
+whose source coordinates (blocking column L, non-blocking column H) travel
+with the number wherever it is used.
 
-**What this does not support.** Counting small patches or added synchronisation
-does **not** establish that developers failed to identify a root cause, that
-fixes are incomplete, or that fixes introduce new bugs. The current work
-contains no experiment measuring those properties, so this report does not
-assert them. A before/after reproducer control can test whether a specific
-fix removes our observed symptom; it cannot on its own prove a general claim
-about fix quality.
+Second, the fix-strategy tables do **not** establish that upstream fixes are
+shallow, incomplete, or that they introduce new bugs. Counting small patches
+or added synchronisation cannot show that developers failed to identify a root
+cause, and the current work contains no experiment measuring those
+properties. A before/after reproducer control can test whether a specific fix
+removes our observed symptom; it cannot on its own prove a general claim
+about fix quality. We therefore assert the correlation, and not the quality.
 
-**Status.** L1 done for the strategy counts.
+**Status.** L1 done for the strategy counts. The fix-quality question remains
+open and is listed in the limitations.
 
-## C4 — Go's built-in detectors miss most of these bugs
+## Claim 3 — Go's built-in detectors miss most of these bugs
+
+*(review claim C4; paper Table 8, Table 12)*
 
 **Paper.** The paper evaluates Go's built-in deadlock detector and race
 detector against the bugs it re-ran:
@@ -187,10 +197,17 @@ workbook has 23 flagged rows, so that disagreement with the paper remains
 unexplained. These flags describe upstream annotations, not this team's
 completed runs — no run in this repository has yet produced a detector result.
 
-**Status.** L2 — **not yet measured.** C's run logs under `repro/*/logs` are the
-only accepted source. Until then the report quotes the paper's detector
-numbers as the paper's, and states plainly that our own coverage is
-unmeasured.
+**Verdict: inconclusive on our side.** The paper's detection gap is
+established in the paper; our own coverage is **not yet measured**. The
+candidate selection and the reproducer contract are complete, but no bug has
+been built and triggered, because the experiment image has not been built and
+verified on a machine with Docker. We therefore quote the paper's detector
+numbers as the paper's, and state plainly that our coverage is unmeasured.
+Quoting a coverage figure of our own before that happens would be an estimate
+presented as a measurement.
+
+**Status.** L2 — pending. C's run logs under `repro/*/logs` are the only
+accepted source.
 
 ## Extension — does Go 1.22 close the loop-variable bug class?
 
