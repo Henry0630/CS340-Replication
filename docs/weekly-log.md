@@ -24,6 +24,7 @@ this table together, so every line here must correspond to a real commit.
 | 2 | 2026-11-14 | 郭子嘉 (D) | `report: number and cross-reference the remaining tables` | Reproduction Setup, Analysis of Discrepancies |
 | 2 | 2026-11-14 | 郭子嘉 (D) | `report: drop textcomp dependency that broke compilation` | Analysis of Discrepancies |
 | 2 | 2026-11-14 | 郭子嘉 (D) | `report: correct cover-page reference to a file the repo does not contain` | Reproduction Setup |
+| 2 | 2026-11-14 | 郭子嘉 (D) | `docs: move the deviation register to a filename the role table leaves free` | Deviations |
 
 ## Scope note on the week-1 data pipeline
 

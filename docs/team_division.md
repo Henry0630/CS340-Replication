@@ -38,7 +38,7 @@ deliverables are written to be *defensible*, not merely complete.
 | A | The deviations register and the paper-vs-ours comparison, reconciled with the actual parser output rather than with the paper's rendered tables. | In progress — `tables_check.md` drafted; reconciliation with D. |
 | B | The experiment image built and **verified** on a machine with Docker: kernel, `go version`, `gcc --version`, base-image digest, image size, and both build timings written into the L2 rows of `docs/environment.md`. The digest must replace the floating tag in the `Dockerfile`. | **Not started.** The L2 rows of `docs/environment.md` are still `pending`; no L2 number may enter the report until they are filled. |
 | C | At least one working reproducer under `repro/<candidate-id>/` with a build log, three runs, and a recorded detector outcome; then the remaining shortlist and the race-detector protocol. The candidate list and the reproducer contract already exist. | Contract and ten candidates done; **no build, run or detector result yet**. |
-| D | `docs/claims.md` reconciled with C's review; `docs/deviations.md` written; `report/main.tex` filled for setup, results, discrepancies, extension and conclusion; `docs/weekly-log.md` corrected to match the real commit subjects. | This commit. |
+| D | `docs/claims.md` reconciled with C's review; `docs/discrepancy_analysis.md` written; `report/main.tex` filled for setup, results, discrepancies, extension and conclusion; `docs/weekly-log.md` corrected to match the real commit subjects. | This commit. |
 
 ### Hard rules for week 2
 

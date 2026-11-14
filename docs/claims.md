@@ -58,7 +58,7 @@ the paper's follows from exactly two decisions:
 
 Under that model we reproduce **paper Table 5 cell by cell for every
 application**, **paper Table 6 in all six cause columns**, and **paper Table 7
-in every cell**. The cell-level account is in `docs/deviations.md`.
+in every cell**. The cell-level account is in `docs/discrepancy_analysis.md`.
 
 An independent cross-check: the two excluded rows, `boltdb#392` and
 `boltdb#240`, are exactly the two bugs the paper's built-in deadlock detector
@@ -96,7 +96,7 @@ access vs. message passing) and *behaviour* (blocking vs. non-blocking).
 
 Net effect: shared memory is unchanged at 105 because the +1 and the −1
 cancel; message passing is −1 because only the excluded BoltDB row is
-message-passing. Full cell-by-cell account in `docs/deviations.md`.
+message-passing. Full cell-by-cell account in `docs/discrepancy_analysis.md`.
 
 **Verdict: supported.** The taxonomy reproduces. The four differing cells are
 exactly the cells the two documented causes predict, and under the paper's own
@@ -240,6 +240,6 @@ extension result is claimed in this report.
 
 A number may only appear in the report if it appears in this file, with a
 pointer to where it was produced: `results/tables/*.csv` for L1,
-`repro/*/logs` for L2. Deviations are registered in `docs/deviations.md`.
+`repro/*/logs` for L2. Deviations are registered in `docs/discrepancy_analysis.md`, the report-facing account written by D; A owns the setup-level deviation log, which is `deviations.md` at the repository root on `a-dataset`.
 Suggested wording and judgments from a review are kept distinct from new
 measurements: a reviewer's suggestion is not evidence.

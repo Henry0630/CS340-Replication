@@ -90,7 +90,7 @@ Tables 9 and 10 match the paper exactly. The differences in Tables 5/6/7 are
 not counting errors: they are fully attributed to two properties of the
 released dataset (two rows carry an issue ID instead of a commit hash, and one
 record carries two cause labels where the paper assigns one). See
-`docs/claims.md` for the claims and `docs/deviations.md` for the cell-level
+`docs/claims.md` for the claims and `docs/discrepancy_analysis.md` for the cell-level
 account.
 
 ## Building the report
