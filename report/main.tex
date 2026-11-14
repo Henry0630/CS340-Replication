@@ -7,6 +7,8 @@
 \documentclass[11pt]{article}
 
 \usepackage[margin=1in]{geometry}
+% Chinese member names need a CJK-capable engine: compile with XeLaTeX.
+\usepackage[UTF8]{ctex}
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{amsmath}
@@ -151,14 +153,14 @@ which files we wrote rather than modified.
 \centering
 \caption{Starting point of the reproduction.}
 \label{tab:starting}
-\begin{tabular}{@{}ll@{}}
+\begin{tabular}{@{}p{0.24\textwidth}p{0.70\textwidth}@{}}
 \toprule
 Item & Value \\
 \midrule
 Upstream dataset & \texttt{system-pclub/go-concurrency-bugs} \\
 Pinned commit & \texttt{f2655063a2278cff64a51121b73801eda05fdcfa} \\
 Artefact used & \texttt{bug table.xlsx} (unmodified) \\
-SHA-256 & \texttt{a0e5f0103600b3c394b86cb975f403789366f0190312019fae648de0cd8e3235} \\
+SHA-256 & \texttt{a0e5f0103600b3c3\allowbreak94b86cb975f40378\allowbreak9366f0190312019f\allowbreakae648de0cd8e3235} \\
 Licence & none stated upstream; redistributed unmodified with credit, for academic replication \\
 Files modified upstream & none --- the dataset is read-only input \\
 Files written by us & \texttt{scripts/}, \texttt{docs/}, \texttt{results/tables/}, \texttt{repro/}, \texttt{report/} \\
@@ -167,7 +169,7 @@ Files written by us & \texttt{scripts/}, \texttt{docs/}, \texttt{results/tables/
 \end{table}
 
 The dataset is obtained by script, never by hand: \texttt{make setup} runs
-\texttt{scripts/fetch_dataset.py}, which downloads the pinned commit, verifies
+\texttt{scripts/fetch\_dataset.py}, which downloads the pinned commit, verifies
 the checksum, and refuses to replace an existing file whose hash does not
 match. \texttt{make check} verifies without downloading. Every number in this
 report therefore comes from a pinned input that a clean checkout can obtain
@@ -215,7 +217,7 @@ operating-system dependent, so they must run on Linux.
 has been built and verified yet, and no level-2 number appears in this
 report until they are filled in.}
 \label{tab:environment}
-\begin{tabular}{@{}ll@{}}
+\begin{tabular}{@{}p{0.26\textwidth}p{0.68\textwidth}@{}}
 \toprule
 Item & Value \\
 \midrule
@@ -490,7 +492,7 @@ Table~\ref{tab:verdicts} summarises the verdict on each of the three claims we t
 \centering
 \caption{Verdict on each tested claim, with the evidence behind it.}
 \label{tab:verdicts}
-\begin{tabular}{@{}lp{0.26\textwidth}p{0.44\textwidth}@{}}
+\begin{tabular}{@{}p{0.19\textwidth}p{0.20\textwidth}p{0.53\textwidth}@{}}
 \toprule
 Claim & Verdict & Evidence \\
 \midrule
@@ -556,7 +558,7 @@ to the paper's value.
 absolute and relative differences. Relative differences are taken against the
 paper's value.}
 \label{tab:gaps}
-\begin{tabular}{@{}lrrrr@{}}
+\begin{tabular}{@{}lrrrr@{}}\small
 \toprule
 Quantity & Paper & Ours & Absolute & Relative \\
 \midrule
