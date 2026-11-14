@@ -8,22 +8,26 @@
 # kernel, compiler and tool versions pinned. This file is that pin.
 #
 # Build (Go 1.22 — the version used for the main reproduction):
-#   docker build --build-arg GO_IMAGE=golang:1.22.4-bookworm -t cs340-repro:go1.22 .
+#   docker build -t cs340-repro:go1.22 .
 #
 # Build (Go 1.21 — same image, only the language version differs; this pair is
 # the one-factor comparison used by the Extension):
-#   docker build --build-arg GO_IMAGE=golang:1.21.13-bookworm -t cs340-repro:go1.21 .
+#   docker build \
+#     --build-arg GO_IMAGE=golang:1.21.13-bookworm@sha256:c6a5b9308b3f3095e8fde83c8bf4d68bd101fce606c1a0a1394522542509dda9 \
+#     -t cs340-repro:go1.21 .
+#
+# Both base images are pinned BY DIGEST, measured 2026-11-14 on a clean runner
+# (see docs/environment.md and results/ci/). A tag alone can be re-pointed
+# upstream; a digest cannot.
 #
 # Run:
 #   docker run --rm cs340-repro:go1.22 sh -c 'uname -a; go version'
 #   docker run --rm -v "$PWD/repro/<bug>:/work" -w /work cs340-repro:go1.22 ./reproduce.sh
 #
-# NOTE (must be done on a machine that has Docker, then committed):
-#   docker image inspect cs340-repro:go1.22 --format '{{index .RepoDigests 0}}'
-# and pin the base image by that digest below, so the image is byte-reproducible
-# even if the tag is re-pointed upstream.
+# Measure the whole thing (versions, sizes, build time, detector sanity) with:
+#   bash docker/verify.sh
 
-ARG GO_IMAGE=golang:1.22.4-bookworm
+ARG GO_IMAGE=golang:1.22.4-bookworm@sha256:0c02666907338370a3272af1b4642a184968911d2317f0bd010dcef89a081d6f
 FROM ${GO_IMAGE}
 
 ARG DEBIAN_FRONTEND=noninteractive

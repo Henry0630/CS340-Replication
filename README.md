@@ -17,65 +17,62 @@ Our reproduction therefore has two layers:
 
 | Layer | What we do | Maps to paper |
 |---|---|---|
-| **L1 — re-derive the statistics** | Parse the released dataset and recompute every table ourselves, then compare against the published numbers | Tables 5, 6, 7, 9, 10 |
+| **L1 — re-derive the statistics** | Parse the released dataset and recompute every table ourselves, then compare against the published numbers | Tables 5, 6, 7, 9, 10, 11 |
 | **L2 — re-run the bugs** | Rebuild a subset of the buggy programs at their buggy commit, trigger the bug, and re-measure detector coverage | Tables 8, 12 (§5.3, §6.3) |
 
-The extension (see `report/main.tex`) changes **one factor**: the Go language
-version, to test whether Go 1.22's per-iteration loop-variable semantics
-eliminates the "anonymous function" bug class the paper reports.
+The extension (§ below) changes **one factor**: the Go language version, to test
+whether Go 1.22's per-iteration loop-variable semantics eliminates the
+"anonymous function" bug class the paper reports.
 
 ## Repository layout
 
 ```
 data/            bug_table.xlsx (upstream dataset, pinned commit below)
-docs/            claims, deviations, table mapping, environment, team division
-scripts/         parse_dataset.py, fetch_dataset.py, md2html.py, make_figures.py
+docs/            claims, table mapping, environment, plan, team division
+scripts/         parse_dataset.py, fetch_dataset.py, md2html.py
 results/tables/  CSV output of the re-derived tables (committed)
 results/raw/     raw run logs (not committed; see .gitignore)
 repro/           one directory per reproduced bug (week 2+)
-report/          main.tex + refs.bib + figures/
-```
+report/          main.tex + refs.bib
 
 Shareable docs: `docs/team_division.md` is the 分工方案; regenerate the PDF with
 `python scripts/md2html.py docs/team_division.md` then
 `msedge --headless=new --print-to-pdf=... docs/team_division.html`.
+```
 
 ## Setup
 
 Requirements: `python3` (stdlib only for the L1 pipeline — no
-pandas/openpyxl needed), `git`, `curl`. The figure script additionally needs
-`matplotlib`. For L2 (reproducing bugs and running the detectors) you need
-**Docker with Linux containers**; the image, the pinned versions and the exact
-steps are in `docs/env-setup.md`. Status: the image has **not been built yet
-on any machine** — do not quote environment numbers in the report before
-`docs/env-setup.md` §6 returns them.
+pandas/openpyxl needed), `git`, `curl`.
+The figure script additionally needs `matplotlib`. L1 runs
+anywhere in **under 2 seconds**.
+
+L2 (reproducing bugs and running the detectors) runs in the pinned container.
+You do **not** need Docker locally: the image is built and measured on a clean
+GitHub Actions runner (`.github/workflows/env.yml`), or in a devcontainer
+(`.devcontainer/devcontainer.json`) / any machine with Docker:
+
+```bash
+bash docker/verify.sh        # builds go1.22 + go1.21, measures everything
+bash docker/verify.sh --quick   # go1.22 only
+```
+
+Measured environment (kernel, Go, gcc, image digests, build times) lives in
+`docs/environment.md`; the raw block is committed under `results/ci/`.
 
 ```bash
 make setup     # fetch the dataset snapshot if data/bug_table.xlsx is missing
-make check     # verify the snapshot's checksum without downloading
 make tables    # recompute every table and print paper-vs-ours comparison
+make env       # print this machine's toolchain versions
 ```
 
 No `make` on Windows (git-bash has none): run `python scripts/fetch_dataset.py`
 and `python scripts/parse_dataset.py` instead — same thing.
 
-## Build / run commands
-
-```bash
-make setup      # download data/bug_table.xlsx (pinned upstream commit)
-make check      # verify its SHA-256; never downloads
-make tables     # L1: recompute Tables 5, 6, 7, 9, 10  -> results/tables/*.csv
-make figures    # regenerate report/figures/*.png from those CSVs
-# parser regression suite (tests/ arrive with the c-repro branch):
-#   python -m unittest discover -s tests -v
-make clean      # remove results/raw and __pycache__
-```
-
 `make tables` prints the deltas against the paper and writes one CSV per table
 to `results/tables/`. Expected runtime: **< 2 seconds** on any machine.
-`make figures` takes a few seconds and needs `matplotlib`.
 
-Expected output (first lines of `make tables`):
+Expected output (first lines):
 
 ```
 rows parsed: blocking=83 non-blocking=86 total=169
@@ -86,26 +83,60 @@ rows parsed: blocking=83 non-blocking=86 total=169
   delta                   -2            0            0           -1
 ```
 
-Tables 9 and 10 match the paper exactly. The differences in Tables 5/6/7 are
-not counting errors: they are fully attributed to two properties of the
-released dataset (two rows carry an issue ID instead of a commit hash, and one
-record carries two cause labels where the paper assigns one). See
-`docs/claims.md` for the claims and `docs/discrepancy_analysis.md` for the cell-level
-account.
+Tables 9 and 10 match the paper exactly; the deviations in Tables 5/6/7 come
+from two BoltDB blocking bugs that are missing from the released snapshot — see
+`docs/claims.md` (claim C2) for the analysis.
 
-## Building the report
+## Build / run commands
 
-The report is LaTeX (`report/main.tex`, `report/refs.bib`). Compile it with
-any TeX distribution, for example:
+```bash
+make setup      # download data/bug_table.xlsx (pinned upstream commit)
+make tables     # L1: recompute Tables 5, 6, 7, 9, 10
+make env        # this machine's toolchain versions
+make docker-build   # build cs340-repro:go1.22 locally (needs Docker)
+make docker-smoke   # uname + go version + gcc inside that image
+make figures    # regenerate report/figures/*.png from those CSVs (needs matplotlib)
+make clean      # remove results/raw and __pycache__
+```
+
+### Expected outputs and runtimes
+
+| Command | Expected output | Runtime |
+|---|---|---|
+| `python scripts/fetch_dataset.py --check` | `sha256=a0e5f010… OK` | < 1 s (already present) |
+| `python scripts/parse_dataset.py` | 6 CSVs in `results/tables/`, deltas vs the paper printed | **< 2 s** |
+| `python scripts/check_env.py` | a markdown table of host/toolchain versions | < 2 s |
+| `bash docker/verify.sh` | the L2 block that fills `docs/environment.md` | **34 s cold / 19 s warm** per image, plus the 1.21 image |
+| `docker build .` | ends with `smoke ok 1` and `go version go1.22.4 linux/amd64` | 19–34 s, image 944 MB |
+
+### Building the report
+
+The report is LaTeX (`report/main.tex`, `report/refs.bib`).
+Compile it with any TeX distribution; the Chinese member names need a
+CJK-capable engine, so use **XeLaTeX**:
 
 ```bash
 cd report
-pdflatex main && bibtex main && pdflatex main && pdflatex main
+xelatex main && bibtex main && xelatex main && xelatex main
 ```
 
 The figures are read from `report/figures/`; run `make figures` first if they
 are missing. A cover page is optional: place a PDF at `report/cover.pdf` and it
 becomes page 1; the document compiles with or without it.
+
+## Reproducibility checklist
+
+What the graders' criterion (25 %) asks for, and where it lives:
+
+| Requirement | Where |
+|---|---|
+| Builds and runs on a clean machine from the README alone | this file + `.github/workflows/env.yml` (CI proves it on every push) |
+| OS, kernel, compiler and tools pinned | `Dockerfile` (digests), `docs/environment.md` (measured table) |
+| Workloads and inputs obtained by a script | `scripts/fetch_dataset.py` (dataset pinned by commit + sha256) |
+| Settings that affect results recorded | `docs/environment.md` (`GOMAXPROCS`, `CGO_ENABLED`, `GOTOOLCHAIN`, `-race`) |
+| No hard-coded paths | all scripts resolve paths relative to the repo |
+| Original code credited, starting commit recorded | "Credits and starting point" below |
+| Data as shipped upstream, unmodified | `data/bug_table.xlsx`, hash recorded |
 
 ## Credits and starting point
 
@@ -114,14 +145,10 @@ becomes page 1; the document compiles with or without it.
   commit, 2019-05-18). `scripts/fetch_dataset.py` records this pin.
 * The upstream repository states no explicit licence; the dataset is used here
   for academic replication only and is redistributed unmodified, with credit.
-  The paper being replicated is © ACM, 2019.
-* **Files we did not modify:** all upstream data. `data/bug_table.xlsx` is
-  byte-identical to the upstream copy.
-* **Files we wrote:** `scripts/fetch_dataset.py`, `scripts/parse_dataset.py`,
-  `scripts/make_figures.py`, `scripts/md2html.py`, everything under
-  `docs/`, `results/tables/`, `repro/`, `report/`, plus `Dockerfile`,
-  `Makefile`, `README.md` and `CONTRIBUTING.md`. `git log` lists the
-  author of every one of them.
+* `scripts/parse_dataset.py` and everything under `docs/`, `results/`, `repro/`
+  is our own code.
+* Files we did not modify: all upstream data. Files we wrote: see `git log`
+  for this repository.
 
 ## Team
 
@@ -134,5 +161,5 @@ becomes page 1; the document compiles with or without it.
 
 ## AI usage
 
-See the AI usage statement in the final report; tool usage per member is
-tracked there, as required by the course.
+See the AI usage statement in the final report; tool usage per member is tracked
+there, as required by the course.

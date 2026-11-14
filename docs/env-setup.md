@@ -1,5 +1,10 @@
 # 环境交接：在有 Docker 的机器上跑一遍（约 30 分钟）
 
+> **更新（11/14）**：现在默认走 **GitHub Actions**（`.github/workflows/env.yml`），
+> 不需要借机器——推一个改动到 `Dockerfile` 或 `docker/`，或手动 Re-run 工作流，就会自动构建、
+> 冒烟测试、并把测量结果提交到 `results/ci/`。本文档保留给两种情况：需要在**自己/借来的机器**
+> 上交互式复现，或者 CI 不可用时手工兜底。
+
 > 背景：B（张歆海）这台 Windows 机器没有也不打算装 Docker / WSL。Dockerfile 已经写好，
 > 但**必须在一台有 Docker 的机器上真跑一遍**才算验证，跑完把下面「回传清单」的东西发回来，
 > B 填进 `docs/environment.md` 并提交。
@@ -27,7 +32,19 @@ time docker build --build-arg GO_IMAGE=golang:1.22.4-bookworm -t cs340-repro:go1
 
 **失败的话把最后 30 行贴回来**，常见原因见第 5 节。
 
-## 2 记录环境（2 分钟）
+## 2 记录环境（一条命令，2 分钟）
+
+```bash
+./docker/verify.sh          # go1.22 + go1.21 两个镜像都构建并测量
+./docker/verify.sh --quick  # 只测 go1.22（时间紧时用）
+```
+
+脚本会输出一段 markdown，包含：宿主机内核/发行版/核数、docker 版本与存储驱动、
+两个镜像的**构建耗时和体积**、**基础镜像 digest**、容器内的 `uname -a` /
+`go version` / `go env` / `gcc --version`，以及 `-race` 数据竞争探测是否真的生效。
+**把整段贴回给 B 就行**，不要手抄——手抄一定会丢字段。
+
+如果脚本跑不了，退回手动版：
 
 ```bash
 docker run --rm cs340-repro:go1.22 sh -c 'uname -a; \
