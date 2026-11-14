@@ -59,7 +59,8 @@ Measured 2026-11-14 by `docker/verify.sh` in CI; raw block:
 3. **Your own machine with Docker:** `make verify` (= `bash docker/verify.sh
    --out results/local/env-L2-<host>.md`). Commit the file under `results/local/`;
    kernel and build times will differ from the CI row, Go/gcc/image digest must
-   not.
+   not. *Status: no student machine has Docker yet, so this route is unused for
+   now — see the decision log.*
 
 ## Environment decision log
 
@@ -72,7 +73,7 @@ workflow above, and interactive work uses Codespaces or a teammate's machine.
 | GitHub Actions runner (Linux) | **used** — clean machine, free, auditable log |
 | GitHub Codespaces (devcontainer) | available as the interactive route |
 | WSL2 + Ubuntu + native Go | not installed on host B |
-| Docker Desktop on host B | being installed (2026-11-14, 600 MB download in progress); optional — the CI route already produces the measured table. Once it runs, `make verify` writes a second, independent measurement to `results/local/` |
+| Docker Desktop on host B | **attempted and abandoned 2026-11-14**: the 595 MB installer transferred at ~55 KB/s over the available proxy and died at 69 MB (curl 56). Not required — the CI runner is the clean-machine evidence; `results/local/` stays empty until a faster link is available |
 | Windows-native Go only | rejected for L2 (wrong OS semantics), fine for reading code |
 
 ## Deviations to record as we go
