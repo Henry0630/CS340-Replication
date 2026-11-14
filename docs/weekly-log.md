@@ -6,10 +6,35 @@ this table together, so every line here must correspond to a real commit.
 
 | Week | Date | Member | Commit summary | Report section it feeds |
 |---|---|---|---|---|
-| 1 | 2026-11-08 | 辛相天 (A) | Pin upstream dataset, add `fetch_dataset.py` / `parse_dataset.py`, regenerate Tables 5/6/7/9/10 | Reproduction Setup, Results |
-| 1 | 2026-11-08 | 张歆海 (B) | `check_env.py`, `docs/environment.md` L1 rows, Dockerfile draft | Reproduction Setup |
-| 1 | 2026-11-08 | 谢昊桐 (C) | Ten candidate bugs with commit hashes and expected triggers (`docs/candidates.md`) | Reproduction Setup |
-| 1 | 2026-11-08 | 郭子嘉 (D) | Repo/branches/collaborators, `docs/team_division.md`, `CONTRIBUTING.md`, Introduction draft, this file | Introduction and Claims |
+| 1 | 2026-11-08 | 辛相天 (A) | `dataset: add tables check and deviations draft` | Deviations |
+| 1 | 2026-11-08 | 张歆海 (B) | `env: pin experiment image with build-time race smoke test` | Reproduction Setup |
+| 1 | 2026-11-08 | 张歆海 (B) | `env: add environment report script and hand-off checklist` | Reproduction Setup |
+| 1 | 2026-11-08 | 张歆海 (B) | `docs: add markdown-to-html converter for shareable documents` | — |
+| 1 | 2026-11-08 | 张歆海 (B) | `meta: record role B in team table` | Team division |
+| 1 | 2026-11-08 | 张歆海 (B) | `meta: force LF line endings for scripts and Dockerfile` | — |
+| 1 | 2026-11-08 | 谢昊桐 (C) | `data: add pinned dataset pipeline and verified tables` | Reproduction Setup, Results |
+| 1 | 2026-11-08 | 谢昊桐 (C) | `repro: complete week-one candidate selection and protocol` | Reproduction Setup, L2 scope |
+| 1 | 2026-11-08 | 郭子嘉 (D) | `meta: fill role table with member names` | Team division |
+| 1 | 2026-11-08 | 郭子嘉 (D) | `report: add introduction draft and weekly log` | Introduction |
+| 2 | 2026-11-14 | 郭子嘉 (D) | `docs: reconcile claims with review and record deviations` | Claims, Deviations |
+| 2 | 2026-11-14 | 郭子嘉 (D) | `report: fill setup, results, discrepancy and extension sections` | Reproduction Setup, Results, Analysis of Discrepancies, Extension |
+
+## Scope note on the week-1 data pipeline
+
+The pinned-data fetcher and the offline parser were implemented by **C**, in
+commit `data: add pinned dataset pipeline and verified tables`, at the request
+of the team, because the pipeline was a cross-role prerequisite. The role table
+assigns the pipeline to **A**, and A's statistical scope — the deviations
+register and the paper-vs-ours comparison — remains A's. The weekly log records
+who wrote the code, not who owns the analysis.
+
+## Merge status
+
+This table lists what exists on each branch; it does **not** claim that the
+branches have been merged. As of the week-2 commit above, `main` still
+carries only the environment work and does not yet contain
+`a-dataset`, `c-repro` or `d-report`. Merges happen in the Sunday window
+defined in `CONTRIBUTING.md`.
 
 ## How to use this file
 
