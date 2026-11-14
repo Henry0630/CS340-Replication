@@ -139,7 +139,7 @@ What the graders' criterion (25 %) asks for, and where it lives:
 | 辛相天 | 124006592 | A — data pipeline & statistics |
 | 张歆海 | 1240012291 | B — build & run environment (Docker, Go toolchain) |
 | 谢昊桐 | 1230022122 | C — bug reproduction & detector experiments |
-| 郭子嘉 | 124015875 | D — analysis, report & presentation |
+| 郭子嘉 | 1240015875 | D — analysis, report & presentation |
 
 ## AI usage
 
