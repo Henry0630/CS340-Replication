@@ -322,8 +322,8 @@ that the two causes in \S\ref{sec:discrepancies} predict, which is a
 stronger statement than agreement in aggregate.
 
 Table~\ref{tab:t6} gives the causes of blocking bugs, our recomputation of
-paper Table~6, and Figure~\ref{fig:causes} shows the same data per
-application.
+paper Table~6, and Figure~\ref{fig:causes} compares the two, both per
+application and per cause category.
 
 \begin{table}[h]
 \centering
@@ -352,9 +352,10 @@ Total       & \textbf{27} & 5 & \textbf{4} & 29 & \textbf{15} & 4 & \textbf{85} 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.92\textwidth]{figures/fig_blocking_causes.png}
-\caption{Causes of blocking bugs per application. Ours (blue) and the
-published Table~6 (grey) differ in the Mutex and Chan-with-library columns
-of BoltDB and in the Wait column of Kubernetes.}
+\caption{Causes of blocking bugs, paper against ours. The left panel
+groups by application, the right by cause category. The three
+differing cells are visible directly in the right panel: Mutex 28 against
+27, Wait 3 against 4, and Chan-with-library 16 against 15.}
 \label{fig:causes}
 \end{figure}
 

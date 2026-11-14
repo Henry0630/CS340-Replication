@@ -37,10 +37,12 @@ PAPER_T6 = {
     "BoltDB": (2, 0, 0, 0, 1, 0),
 }
 
-GREY = "#9aa0a6"
-BLUE = "#1a73e8"
+GREY = "#9aa0a6"      # paper
+BLUE = "#1a73e8"      # ours
 ORANGE = "#e8710a"
 GREEN = "#188038"
+PURPLE = "#9334e6"
+RED = "#d93025"
 
 
 def read_table(path):
@@ -87,58 +89,76 @@ def fig_taxonomy(csv_path, out_path):
 
 
 def fig_blocking_causes(csv_path, out_path):
+    """Two panels: totals per application, and totals per cause category.
+
+    Bars for the paper and for ours sit side by side so that the three
+    differing cause cells are directly visible.
+    """
     header, rows = read_table(csv_path)
     apps = [r[0] for r in rows]
     ours = {r[0]: [int(x) for x in r[1:7]] for r in rows}
     causes = ["Mutex", "RWMutex", "Wait", "Chan", "Chan w/", "Messaging Lib"]
 
-    fig, ax = plt.subplots(figsize=(9.5, 4.2))
+    fig, (axl, axr) = plt.subplots(1, 2, figsize=(12.0, 4.3))
+
+    # left: total cause assignments per application
     x = range(len(apps))
-    width = 0.13
-    for i, cause in enumerate(causes):
-        paper_vals = [PAPER_T6[a][i] for a in apps]
-        our_vals = [ours[a][i] for a in apps]
-        offset = (i - 2.5) * width
-        ax.bar([p + offset for p in x], paper_vals, width,
-               color=GREY, alpha=0.85,
-               label=cause if False else None)
-        ax.bar([p + offset for p in x], our_vals, width,
-               color=BLUE, alpha=0.9,
-               label=cause)
-    ax.set_xticks(list(x))
-    ax.set_xticklabels(apps, fontsize=9)
-    ax.set_ylabel("cause assignments", fontsize=9)
-    ax.set_title("Causes of blocking bugs per application "
-                 "(blue = ours, grey = paper)", fontsize=11)
-    ax.legend(fontsize=8, frameon=False, ncol=3)
-    ax.grid(axis="y", alpha=0.3, linewidth=0.5)
-    ax.set_axisbelow(True)
-    for spine in ("top", "right"):
-        ax.spines[spine].set_visible(False)
-    fig.tight_layout()
+    width = 0.36
+    paper_tot = [sum(PAPER_T6[a]) for a in apps]
+    our_tot = [sum(ours[a]) for a in apps]
+    axl.bar([p - width / 2 for p in x], paper_tot, width,
+            label="Paper", color=GREY)
+    axl.bar([p + width / 2 for p in x], our_tot, width,
+            label="Ours", color=BLUE)
+    axl.set_xticks(list(x))
+    axl.set_xticklabels(apps, fontsize=8, rotation=30, ha="right")
+    axl.set_ylabel("cause assignments", fontsize=9)
+    axl.set_title("Per application", fontsize=10)
+    axl.legend(fontsize=8, frameon=False)
+    axl.grid(axis="y", alpha=0.3, linewidth=0.5)
+    axl.set_axisbelow(True)
+
+    # right: totals per cause category
+    paper_c = [sum(PAPER_T6[a][i] for a in apps) for i in range(6)]
+    our_c = [sum(ours[a][i] for a in apps) for i in range(6)]
+    y = range(len(causes))
+    axr.barh([p - width / 2 for p in y], paper_c, height=width,
+             label="Paper", color=GREY)
+    axr.barh([p + width / 2 for p in y], our_c, height=width,
+             label="Ours", color=BLUE)
+    axr.set_yticks(list(y))
+    axr.set_yticklabels(causes, fontsize=9)
+    axr.invert_yaxis()
+    axr.set_xlabel("cause assignments", fontsize=9)
+    axr.set_title("Per cause category", fontsize=10)
+    axr.legend(fontsize=8, frameon=False)
+    axr.grid(axis="x", alpha=0.3, linewidth=0.5)
+    axr.set_axisbelow(True)
+
+    for ax in (axl, axr):
+        for spine in ("top", "right"):
+            ax.spines[spine].set_visible(False)
+        ax.tick_params(labelsize=8)
+
+    fig.suptitle("Causes of blocking bugs (paper Table 6 vs. ours)", fontsize=11)
+    fig.tight_layout(rect=(0, 0, 1, 0.94))
     fig.savefig(out_path, dpi=200)
     plt.close(fig)
 
 
 def fig_nontraditional(out_path, blocking_nt=54, nonblocking_nt=40,
                        total=169, blocking=83, nonblocking=86):
+    """Same colour means the same category in both panels."""
     fig, axes = plt.subplots(1, 2, figsize=(9.0, 3.8))
 
-    ax = axes[0]
-    vals = [blocking_nt, blocking - blocking_nt]
-    ax.pie(vals, labels=["non-traditional", "traditional"],
-           colors=[BLUE, GREY], autopct="%1.1f%%", startangle=90,
-           textprops={"fontsize": 9})
-    ax.set_title("Blocking: %d of %d non-traditional" % (blocking_nt, blocking),
-                 fontsize=10)
-
-    ax = axes[1]
-    vals = [nonblocking_nt, nonblocking - nonblocking_nt]
-    ax.pie(vals, labels=["non-traditional", "traditional"],
-           colors=[ORANGE, GREY], autopct="%1.1f%%", startangle=90,
-           textprops={"fontsize": 9})
-    ax.set_title("Non-blocking: %d of %d non-traditional"
-                 % (nonblocking_nt, nonblocking), fontsize=10)
+    for ax, nt, tot, title in (
+            (axes[0], blocking_nt, blocking, "Blocking"),
+            (axes[1], nonblocking_nt, nonblocking, "Non-blocking")):
+        ax.pie([nt, tot - nt], labels=["non-traditional", "traditional"],
+               colors=[BLUE, GREY], autopct="%1.1f%%", startangle=90,
+               textprops={"fontsize": 9})
+        ax.set_title("%s: %d of %d non-traditional" % (title, nt, tot),
+                     fontsize=10)
 
     fig.suptitle("Non-traditional label share: %d of %d records (%.1f%%)"
                  % (blocking_nt + nonblocking_nt, total,
@@ -156,7 +176,7 @@ def fig_fix_strategies(csv_path, out_path):
 
     fig, ax = plt.subplots(figsize=(9.0, 4.0))
     bottom = [0.0] * len(causes)
-    palette = [BLUE, ORANGE, GREEN, "#9334e6", "#e37400"]
+    palette = [BLUE, ORANGE, GREEN, PURPLE, RED]
     for i, strat in enumerate(strategies):
         vals = [float(r[1 + i]) for r in rows]
         ax.barh(causes, vals, left=bottom, label=strat,
@@ -192,13 +212,15 @@ def main():
                               os.path.join(args.output, "fig_taxonomy.png"))))
     made.append(("fig_blocking_causes.png",
                  fig_blocking_causes(os.path.join(tables, "table6.csv"),
-                                     os.path.join(args.output, "fig_blocking_causes.png"))))
+                                     os.path.join(args.output,
+                                                  "fig_blocking_causes.png"))))
     made.append(("fig_nontraditional.png",
                  fig_nontraditional(os.path.join(args.output,
                                                 "fig_nontraditional.png"))))
     made.append(("fig_fix_strategies.png",
                  fig_fix_strategies(os.path.join(tables, "table7.csv"),
-                                    os.path.join(args.output, "fig_fix_strategies.png"))))
+                                    os.path.join(args.output,
+                                                 "fig_fix_strategies.png"))))
     for name, _ in made:
         print("wrote", os.path.join(args.output, name))
 
