@@ -1,5 +1,10 @@
 # 环境交接：在有 Docker 的机器上跑一遍（约 30 分钟）
 
+> **更新（11/14）**：现在默认走 **GitHub Actions**（`.github/workflows/env.yml`），
+> 不需要借机器——推一个改动到 `Dockerfile` 或 `docker/`，或手动 Re-run 工作流，就会自动构建、
+> 冒烟测试、并把测量结果提交到 `results/ci/`。本文档保留给两种情况：需要在**自己/借来的机器**
+> 上交互式复现，或者 CI 不可用时手工兜底。
+
 > 背景：B（张歆海）这台 Windows 机器没有也不打算装 Docker / WSL。Dockerfile 已经写好，
 > 但**必须在一台有 Docker 的机器上真跑一遍**才算验证，跑完把下面「回传清单」的东西发回来，
 > B 填进 `docs/environment.md` 并提交。

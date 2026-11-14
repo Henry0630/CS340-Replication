@@ -1,11 +1,14 @@
 # Environment
 
-Everything that affects the numbers must be pinned here and reproduced by the
-`Dockerfile` (week 2). Until the container exists and has been built, this file
-is the single source of truth for "what we ran on".
+Everything that affects the numbers is pinned here and reproduced by
+`Dockerfile` + `.github/workflows/env.yml`. `python scripts/check_env.py` prints
+the same facts for whatever machine you are sitting at.
 
-Regenerate the machine facts with `python scripts/check_env.py` (it prints a
-markdown block; paste it below instead of typing values by hand).
+The image is **built and measured on a clean GitHub Actions runner**, not on a
+student laptop: the B machine has no Docker (decision log below), and a CI run is
+a better "clean machine" than any laptop — anyone, including the TA, can press
+"Re-run" and get the same block. The raw measurement is committed under
+`results/ci/`.
 
 ## L1 — dataset statistics (works anywhere)
 
@@ -14,64 +17,68 @@ markdown block; paste it below instead of typing values by hand).
 | Python | 3.11.15 (standard library only; 3.8+ works) |
 | Dataset | `bug table.xlsx`, upstream commit `f2655063a2278cff64a51121b73801eda05fdcfa` |
 | Dataset sha256 | `a0e5f0103600b3c394b86cb975f403789366f0190312019fae648de0cd8e3235` |
-| Host used (host B) | Windows 11 build 10.0.26300, Intel Core 5 220H (16 logical cores), 15.6 GB RAM |
+| Host used for L1 | Windows 11 build 10.0.26300, Intel Core 5 220H (16 logical cores), 15.6 GB RAM |
 | Runtime of `make tables` | < 2 s |
 
 L1 has no dependency on the Go toolchain, so its results must be identical on
 every member's machine. If they differ, the counting logic is wrong.
 
-## L2 — bug reproduction and detector experiments (week 2+)
+## L2 — reproduction and detector experiments (measured)
 
-The experiments must run on **Linux**: the paper measured Go programs on Linux,
-and hang/timeout, signal delivery and the race detector's behaviour are
-OS-specific. Target environment (container on top of a Linux host):
+Measured 2026-11-14 by `docker/verify.sh` in CI; raw block:
+`results/ci/env-L2-20261114T1111Z.md`. Re-run: Actions → *environment* →
+"Re-run all jobs".
 
 | Item | Value |
 |---|---|
-| Host OS / kernel | _to fill: `uname -a` inside the container/VM_ |
-| Go version | `golang:1.22.4-bookworm` → `go1.22.4 linux/amd64` (language version 1.22) |
-| Extension comparison | `golang:1.21.13-bookworm` — same image, only the Go version differs |
-| Compiler | gcc from `build-essential` in the image (record `gcc --version`) |
-| Image digest | _to fill after the first build_ (`docker image inspect`) |
-| CPU / cores / RAM | inherited from host: Intel Core 5 220H, 16 logical cores, 15.6 GB |
-| `GOMAXPROCS` | 4, fixed in the Dockerfile |
-| `CGO_ENABLED` | 1 (the race detector needs cgo) |
-| Detector flags | `-race` for data races; the built-in deadlock detector is always on |
-| Runs per bug | ≥ 3 for statistics; 100 for the race-detector experiment (Table 12 protocol) |
-| Run duration | _to fill: seconds per reproducer, so the README can state expected runtimes_ |
+| Measurement host | GitHub Actions `ubuntu-22.04` runner, 4 vCPU, Docker 28.0.4 (`overlay2`) |
+| Host OS / kernel | Ubuntu 22.04.5 LTS / `Linux 6.8.0-1070-azure x86_64` |
+| Container OS | Debian GNU/Linux 12 (bookworm) |
+| Go, main reproduction | `go1.22.4 linux/amd64` |
+| Go, Extension control | `go1.21.13 linux/amd64` |
+| Compiler | `gcc (Debian 12.2.0-14) 12.2.0` |
+| Base image, main | `golang@sha256:0c02666907338370a3272af1b4642a184968911d2317f0bd010dcef89a081d6f` (tag `golang:1.22.4-bookworm`) |
+| Base image, control | `golang@sha256:c6a5b9308b3f3095e8fde83c8bf4d68bd101fce606c1a0a1394522542509dda9` (tag `golang:1.21.13-bookworm`) |
+| Image size | 944 MB (go1.22) / 934 MB (go1.21) |
+| Image build time | 34 s cold, 19 s warm (go1.22); 32 s cold, 17 s warm (go1.21) |
+| `GOMAXPROCS` | 4, set in the image |
+| `CGO_ENABLED` | 1 (required by the race detector) |
+| `GOTOOLCHAIN` | `local` — Go cannot silently swap toolchains |
+| Detector flags | `-race`; the built-in deadlock detector is always on |
+| Race detector verified | PASS — the build-time smoke test reports `DATA RACE` |
+| Runs per bug | ≥ 3 for statistics; 100 for the Table 12 protocol |
+| Wall time per reproducer | _to fill in week 3, per bug, in the README_ |
+
+### Three ways to reproduce this table
+
+1. **CI (default, no local install):** push a change to `Dockerfile` / `docker/`,
+   or run the workflow manually. The job builds both images, runs the smoke test,
+   and commits the measured block to `results/ci/`.
+2. **GitHub Codespaces:** open the repo → *Code* → *Codespaces* → create; the
+   devcontainer installs Docker-in-Docker, then run `bash docker/verify.sh`.
+3. **Your own machine with Docker:** `bash docker/verify.sh` (Linux containers).
 
 ## Environment decision log
 
-**Decision (2026-11-07, host B / 张歆海):** no environment is installed on the
-B machine (no Go, no Docker, no WSL2, and the group decided not to install
-them). L2 experiments run on a teammate's machine that has Docker; the
-`Dockerfile` in this repository is the single pin, and the hand-off procedure is
-`docs/env-setup.md`.
-
-Consequence to keep honest in the report: the image is **unverified until
-someone runs it** — mark the L2 rows in this file `pending` until the hand-off
-checklist returns the values below. Do not write environment numbers into the
-report before they come from a real build.
+**Decision (2026-11-07, host B / 张歆海):** no environment is installed on the B
+machine (no Go, no Docker, no WSL2). L2 is built and measured through the CI
+workflow above, and interactive work uses Codespaces or a teammate's machine.
 
 | Candidate | Decision |
 |---|---|
-| WSL2 + Ubuntu + native Go | not installed on host B (decided 2026-11-07) |
-| Docker Desktop (WSL2 backend) | not installed on host B; used instead on a teammate's machine |
-| Windows-native Go only | rejected for L2 (wrong OS semantics), acceptable for reading code |
-| Remote Linux VM | not needed |
-
-Verification status: **not yet verified on any machine** — pending the hand-off.
+| GitHub Actions runner (Linux) | **used** — clean machine, free, auditable log |
+| GitHub Codespaces (devcontainer) | available as the interactive route |
+| WSL2 + Ubuntu + native Go | not installed on host B |
+| Docker Desktop on host B | not installed on host B |
+| Windows-native Go only | rejected for L2 (wrong OS semantics), fine for reading code |
 
 ## Deviations to record as we go
 
 The report needs a table with **item / paper's setting / our setting / reason**.
-Known deviations to enter immediately:
 
-1. Go version: the paper studied bugs from 2015–2018 code; we build with a
-   modern toolchain → old code may not compile (API drift). Pin each upstream
-   repository at its buggy commit and record every workaround.
-2. Scale: we reproduce a subset (target 15–20 bugs), not all 41.
-3. Hardware: our laptop/VM vs. the authors' machines — matters little here
-   because the paper's metrics are counts, not throughputs; state it anyway.
-4. Two BoltDB blocking bugs are absent from the released dataset; if they are
-   not recovered, we report 83 blocking bugs instead of 85.
+| Item | Paper | Ours | Reason |
+|---|---|---|---|
+| Experiment host | Authors' machines, Go 1.11-era | GitHub Actions `ubuntu-22.04`, kernel 6.8 | The B machine has no Docker; the paper's metrics are counts, so the host does not change them |
+| Go version | Bugs from 2015–2018 code | go1.22.4 (builds may need `-mod=mod` / API fixes) | Modern toolchain; every workaround per bug goes in `repro/<bug>/notes.md` |
+| Scale | 41 bugs re-run | target 15–20 | Time; stated as a reduced scale |
+| Dataset size | 85 blocking bugs | 83 blocking patches shipped upstream | Two BoltDB blocking bugs are missing from the release (see `docs/claims.md` C2) |

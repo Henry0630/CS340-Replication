@@ -16,8 +16,8 @@ set -uo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT" || exit 1
 
-BASE22="golang:1.22.4-bookworm"
-BASE21="golang:1.21.13-bookworm"
+BASE22="golang:1.22.4-bookworm@sha256:0c02666907338370a3272af1b4642a184968911d2317f0bd010dcef89a081d6f"
+BASE21="golang:1.21.13-bookworm@sha256:c6a5b9308b3f3095e8fde83c8bf4d68bd101fce606c1a0a1394522542509dda9"
 TAG22="cs340-repro:go1.22"
 TAG21="cs340-repro:go1.21"
 MODE="full"
