@@ -17,7 +17,7 @@
 
 | 时间 | 动作 |
 |---|---|
-| 今天（周六）晚 | **B（仓库 owner）**加 3 个 collaborator（不然后面全阻塞）；各自开始动手 |
+| 今天（周六）晚 | 各自开始动手（collaborator 上周已加好，无需再做） |
 | 周六 23:00 | 每人本地 `git commit` 完成，群里报一句 |
 | 周日 12:00 | 全部 push（先 `git pull --rebase`） |
 | 周日 21:30 | 开 PR / 合并；确认 `main` 能跑 |
@@ -146,7 +146,7 @@ repro: add 3 working reproducers for blocking bugs (<学号> <姓名>)
 
 | 文件 | 说明 |
 |---|---|
-| GitHub 仓库设置 | 加 3 个 collaborator —— **只能由仓库 owner（张歆海）做，不属于 D** |
+| GitHub 仓库设置 | ✅ 去年已加好（上周完成），本周不用管 |
 | `docs/team_division.md` | 角色表填真实姓名 + 学号 |
 | `README.md` | Team 表补齐四人 |
 | `docs/weekly-log.md` | **新建**：日期 / 成员 / 提交摘要 / 对应报告章节 |
@@ -154,7 +154,7 @@ repro: add 3 working reproducers for blocking bugs (<学号> <姓名>)
 
 ### 步骤
 
-1. 建四条分支（`a-dataset`/`b-env`/`c-repro`/`d-report`）；collaborator 由仓库 owner 加，D 不用管。
+1. 建四条分支（`a-dataset`/`b-env`/`c-repro`/`d-report`）；collaborator 上周已加好，不用管。
 2. 填角色表与 README Team 表（A 是 xxt，B 是张歆海 1240012291，C/D 填认领的人）。
 3. `report/main.tex`：Introduction 三段——problem（Go 的并发模型与"消息传递更安全"的信念）、claims（C1–C4 各一句）、scope（L1 全表 + L2 15–20 个 bug + Extension）。能编译成 PDF 即可。
 4. `docs/weekly-log.md` 补第 1 周与第 2 周的记录（第 1 周：B 的 5 条提交；第 2 周：按实际填）。
@@ -191,7 +191,7 @@ report: add introduction draft and weekly log (<学号> <姓名>)
 
 | 风险 | 处理 |
 |---|---|
-| 到今天还没加 collaborator | **只有仓库 owner（张歆海）能做**，10 分钟；不加则 A/C/D 全部推不上来 |
+| 权限：collaborator 已加（上周） | 若某人仍推不上来，让对方确认接受了邀请、且用的是**自己的** GitHub 账号 |
 | C 没有 Docker 环境 | Codespaces（`.devcontainer/` 已就绪）或让 B 的机器代跑 |
 | A 追不到那 2 个 BoltDB bug | 写明搜索范围与结论，作为 limitation，不硬凑 |
 | 某人今天做不完 | **提前说**，由搭档接手并在 PR 描述里写清"谁做了什么"；不要让本周空着 |

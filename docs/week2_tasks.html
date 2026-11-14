@@ -51,7 +51,7 @@ a { color: #1f4e79; }
 <table>
 <thead><tr><th>时间</th><th>动作</th></tr></thead>
 <tbody>
-<tr><td>今天（周六）晚</td><td><strong>B（仓库 owner）</strong>加 3 个 collaborator（不然后面全阻塞）；各自开始动手</td></tr>
+<tr><td>今天（周六）晚</td><td>各自开始动手（collaborator 上周已加好，无需再做）</td></tr>
 <tr><td>周六 23:00</td><td>每人本地 <code>git commit</code> 完成，群里报一句</td></tr>
 <tr><td>周日 12:00</td><td>全部 push（先 <code>git pull --rebase</code>）</td></tr>
 <tr><td>周日 21:30</td><td>开 PR / 合并；确认 <code>main</code> 能跑</td></tr>
@@ -163,7 +163,7 @@ repro: add 3 working reproducers for blocking bugs (&lt;学号&gt; &lt;姓名&gt
 <table>
 <thead><tr><th>文件</th><th>说明</th></tr></thead>
 <tbody>
-<tr><td>GitHub 仓库设置</td><td>加 3 个 collaborator —— <strong>只能由仓库 owner（张歆海）做，不属于 D</strong></td></tr>
+<tr><td>GitHub 仓库设置</td><td>✅ 去年已加好（上周完成），本周不用管</td></tr>
 <tr><td><code>docs/team_division.md</code></td><td>角色表填真实姓名 + 学号</td></tr>
 <tr><td><code>README.md</code></td><td>Team 表补齐四人</td></tr>
 <tr><td><code>docs/weekly-log.md</code></td><td><strong>新建</strong>：日期 / 成员 / 提交摘要 / 对应报告章节</td></tr>
@@ -171,7 +171,7 @@ repro: add 3 working reproducers for blocking bugs (&lt;学号&gt; &lt;姓名&gt
 </tbody></table>
 <h3>步骤</h3>
 <ol>
-<li>建四条分支（<code>a-dataset</code>/<code>b-env</code>/<code>c-repro</code>/<code>d-report</code>）；collaborator 由仓库 owner 加，D 不用管。</li>
+<li>建四条分支（<code>a-dataset</code>/<code>b-env</code>/<code>c-repro</code>/<code>d-report</code>）；collaborator 上周已加好，不用管。</li>
 <li>填角色表与 README Team 表（A 是 xxt，B 是张歆海 1240012291，C/D 填认领的人）。</li>
 <li><code>report/main.tex</code>：Introduction 三段——problem（Go 的并发模型与&quot;消息传递更安全&quot;的信念）、claims（C1–C4 各一句）、scope（L1 全表 + L2 15–20 个 bug + Extension）。能编译成 PDF 即可。</li>
 <li><code>docs/weekly-log.md</code> 补第 1 周与第 2 周的记录（第 1 周：B 的 5 条提交；第 2 周：按实际填）。</li>
@@ -201,7 +201,7 @@ report: add introduction draft and weekly log (&lt;学号&gt; &lt;姓名&gt;)</c
 <table>
 <thead><tr><th>风险</th><th>处理</th></tr></thead>
 <tbody>
-<tr><td>到今天还没加 collaborator</td><td><strong>只有仓库 owner（张歆海）能做</strong>，10 分钟；不加则 A/C/D 全部推不上来</td></tr>
+<tr><td>权限：collaborator 已加（上周）</td><td>若某人仍推不上来，让对方确认接受了邀请、且用的是<strong>自己的</strong> GitHub 账号</td></tr>
 <tr><td>C 没有 Docker 环境</td><td>Codespaces（<code>.devcontainer/</code> 已就绪）或让 B 的机器代跑</td></tr>
 <tr><td>A 追不到那 2 个 BoltDB bug</td><td>写明搜索范围与结论，作为 limitation，不硬凑</td></tr>
 <tr><td>某人今天做不完</td><td><strong>提前说</strong>，由搭档接手并在 PR 描述里写清&quot;谁做了什么&quot;；不要让本周空着</td></tr>
