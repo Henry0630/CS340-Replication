@@ -160,7 +160,7 @@ Item & Value \\
 Upstream dataset & \texttt{system-pclub/go-concurrency-bugs} \\
 Pinned commit & \texttt{f2655063a2278cff64a51121b73801eda05fdcfa} \\
 Artefact used & \texttt{bug table.xlsx} (unmodified) \\
-SHA-256 & \texttt{a0e5f0103600b3c3\allowbreak94b86cb975f40378\allowbreak9366f0190312019f\allowbreakae648de0cd8e3235} \\
+SHA-256 & \nolinkurl{a0e5f0103600b3c394b86cb975f403789366f0190312019fae648de0cd8e3235} \\
 Licence & none stated upstream; redistributed unmodified with credit, for academic replication \\
 Files modified upstream & none --- the dataset is read-only input \\
 Files written by us & \texttt{scripts/}, \texttt{docs/}, \texttt{results/tables/}, \texttt{repro/}, \texttt{report/} \\
@@ -215,9 +215,10 @@ operating-system dependent, so they must run on Linux.
 \centering
 \caption{Execution environment. The level-2 rows are \emph{measured}: the
 images were built and their toolchain recorded by \texttt{docker/verify.sh}
-in CI on 2026-11-14; the raw block is committed under \texttt{results/ci/}.
-No level-2 \emph{detector coverage} number appears in this report, because no
-individual bug has been rebuilt and triggered yet.}
+in CI on 2026-11-14; the raw block is committed under \texttt{results/ci/},
+and the full record is \texttt{docs/environment.md}. No level-2
+\emph{detector coverage} number appears in this report, because no individual
+bug has been rebuilt and triggered yet.}
 \label{tab:environment}
 \begin{tabular}{@{}p{0.26\textwidth}p{0.68\textwidth}@{}}
 \toprule
@@ -230,8 +231,8 @@ Extension image & \texttt{golang:1.21.13-bookworm} (Go~1.21) \\
 Measurement host & GitHub Actions \texttt{ubuntu-22.04}, 4 vCPU, Docker 28.0.4 (\texttt{overlay2}) \\
 Host OS / kernel & Ubuntu 22.04.5 LTS, \texttt{Linux 6.8.0-1070-azure x86\_64} \\
 Container OS & Debian GNU/Linux 12 (bookworm) \\
-Base image, main & \texttt{0c02666907338370\allowbreaka3272af1b4642a18\allowbreak4968911d2317f0bd\allowbreak010dcef89a081d6f} (tag \texttt{golang:1.22.4-bookworm}) \\
-Base image, control & \texttt{c6a5b9308b3f3095\allowbreake8fde83c8bf4d68b\allowbreakd101fce606c1a0a1\allowbreak394522542509dda9} (tag \texttt{golang:1.21.13-bookworm}) \\
+Base image, main & \nolinkurl{0c02666907338370a3272af1b4642a184968911d2317f0bd010dcef89a081d6f} (tag \texttt{golang:1.22.4-bookworm}) \\
+Base image, control & \nolinkurl{c6a5b9308b3f3095e8fde83c8bf4d68bd101fce606c1a0a1394522542509dda9} (tag \texttt{golang:1.21.13-bookworm}) \\
 Image size / build time & 944\,MB, 34\,s cold and 19\,s warm (Go~1.22); 934\,MB, 32\,s cold and 17\,s warm (Go~1.21) \\
 Compiler (\texttt{gcc --version}) & \texttt{gcc (Debian 12.2.0-14) 12.2.0} \\
 Race detector & verified: the build-time smoke test reports \texttt{DATA RACE} \\
@@ -565,7 +566,8 @@ to the paper's value.
 absolute and relative differences. Relative differences are taken against the
 paper's value.}
 \label{tab:gaps}
-\begin{tabular}{@{}lrrrr@{}}\small
+{\small
+\begin{tabular}{@{}lrrrr@{}}
 \toprule
 Quantity & Paper & Ours & Absolute & Relative \\
 \midrule
@@ -601,7 +603,7 @@ Non-traditional labels     & --- & 94 of 169 & --- & $55.6\,\%$ \\
 Blocking flagged reproduced & 21 & 19 & $-2$ & $-9.52\,\%$ \\
 Non-blocking flagged reproduced & 20 & 23 & $+3$ & $+15.0\,\%$ \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 The two largest relative differences are the three-cell change in the
@@ -612,7 +614,7 @@ two cause labels where the paper assigns one. The large percentages on
 single-digit cells (for example \texttt{Wait}/\texttt{Remove}, $+100\,\%$)
 reflect a base of one or two records and should not be read as a
 substantive change; that is precisely why the cell-level account in
-\texttt{docs/deviations.md} is given alongside the percentages.
+\texttt{docs/discrepancy\_analysis.md} is given alongside the percentages.
 
 \subsection{Evidence: controlled checks rather than assertion}
 
