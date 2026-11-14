@@ -72,7 +72,7 @@ workflow above, and interactive work uses Codespaces or a teammate's machine.
 | GitHub Actions runner (Linux) | **used** — clean machine, free, auditable log |
 | GitHub Codespaces (devcontainer) | available as the interactive route |
 | WSL2 + Ubuntu + native Go | not installed on host B |
-| Docker Desktop on host B | not installed on host B |
+| Docker Desktop on host B | being installed (2026-11-14, 600 MB download in progress); optional — the CI route already produces the measured table. Once it runs, `make verify` writes a second, independent measurement to `results/local/` |
 | Windows-native Go only | rejected for L2 (wrong OS semantics), fine for reading code |
 
 ## Deviations to record as we go
