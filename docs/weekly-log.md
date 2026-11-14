@@ -30,6 +30,7 @@ this table together, so every line here must correspond to a real commit.
 | 2 | 2026-11-14 | 郭子嘉 (D) | `meta: merge B's measured experiment environment into main` | Reproduction Setup |
 | 2 | 2026-11-15 | 郭子嘉 (D) | `report: fix the remaining LaTeX errors so the PDF builds cleanly` | Reproduction Setup, Analysis of Discrepancies |
 | 2 | 2026-11-15 | 郭子嘉 (D) | `docs: point the role table at the real deviations file and log the merge` | Team division |
+| 2 | 2026-11-15 | 郭子嘉 (D) | `docs: align the weekly log with the commit subjects` | Contribution Statement |
 
 ## Scope note on the week-1 data pipeline
 
