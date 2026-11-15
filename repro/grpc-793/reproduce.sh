@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 # Reproducer runner for the extracted grpc-go #793 model.
 #
-# Contract: repro/README.md. Exit 0 = every requested trial was recorded and
-# classified; 2 = invalid arguments; 3 = setup/build failure; 4 = runner or
-# oracle failure, or a failed fixed control.
+# Exit 0 = symptom reproduced, 1 = symptom absent, 2 = setup or runner failure.
 set -u
 
 CANDIDATE_ID="grpc-793"
@@ -17,9 +15,19 @@ REQUIRES_LINUX="no"
 
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd) || {
     echo "reproduce.sh: cannot resolve the script directory" >&2
-    exit 3
+    exit 2
 }
 HARNESS_DIR="$SCRIPT_DIR/harness"
+
+if [ "$#" -eq 0 ]; then
+    run_id=$(date -u '+%Y%m%dT%H%M%SZ')-$$
+    for variant in buggy fixed; do
+        output="$SCRIPT_DIR/runs/$run_id-$variant"
+        bash "$0" --variant "$variant" --mode symptom --runs 3 --timeout 10 --output "$output" || exit $?
+        cat "$output/runs.jsonl" >>"$SCRIPT_DIR/runs.jsonl" || exit 2
+    done
+    exit 0
+fi
 
 usage() {
     cat <<'EOF'
@@ -30,8 +38,8 @@ Runs the extracted grpc-go #793 harness (repeated GracefulStop) N times and
 writes one JSON object per trial to DIR/runs.jsonl, plus stdout, stderr,
 stack, and build evidence in DIR.
 
-exit codes: 0 all requested trials recorded; 2 invalid arguments;
-            3 setup/build failure; 4 runner/oracle failure or failed fixed control.
+exit codes: 0 symptom reproduced (or fixed control passed);
+            1 symptom absent; 2 invalid input, build, or runner failure.
 EOF
 }
 
@@ -43,7 +51,7 @@ die_usage() {
 
 die_setup() {
     printf 'reproduce.sh: setup/build failure: %s\n' "$*" >&2
-    exit 3
+    exit 2
 }
 
 VARIANT=""
@@ -153,13 +161,14 @@ printf 'go: %s\nGOOS=%s GOARCH=%s\nGOMAXPROCS=%s CGO_ENABLED=%s GOTOOLCHAIN=%s\n
 BUILD_RC=$?
 if [ "$BUILD_RC" -ne 0 ]; then
     printf 'reproduce.sh: build failed for variant %s; see %s\n' "$VARIANT" "$BUILD_LOG" >&2
-    exit 3
+    exit 2
 fi
 printf 'reproduce.sh: built %s variant at %s\n' "$VARIANT" "$BINARY"
 
 trial=1
 recorded=0
 control_failed=0
+reproduced=0
 while [ "$trial" -le "$RUNS" ]; do
     stem=$(printf 'run-%03d' "$trial")
     stdout_path="$OUT_DIR/$stem.stdout"
@@ -228,6 +237,10 @@ while [ "$trial" -le "$RUNS" ]; do
         fi
     fi
 
+    if [ "$VARIANT" = "buggy" ] && [ "$trigger_observed" = true ]; then
+        reproduced=$((reproduced + 1))
+    fi
+
     SCHEMA_VERSION="$SCHEMA_VERSION" CANDIDATE_ID="$CANDIDATE_ID" RUN_ID="$RUN_ID" \
     TRIAL="$trial" VARIANT="$VARIANT" MODE="$MODE" REPOSITORY="$REPOSITORY" \
     DATASET_COMMIT="$DATASET_COMMIT" CHECKOUT_COMMIT="$CHECKOUT_COMMIT" \
@@ -239,7 +252,7 @@ while [ "$trial" -le "$RUNS" ]; do
     TRIGGER="$trigger_observed" DETECTOR="$detector_detected" \
     EVIDENCE="$oracle_evidence" STDOUT_REL="$stem.stdout" \
     STDERR_REL="$stem.stderr" STACKS_REL="$stem.stacks" OUT_DIR="$OUT_DIR" \
-    python3 - <<'PY' || { echo "reproduce.sh: failed to record trial $trial" >&2; exit 4; }
+    python3 - <<'PY' || { echo "reproduce.sh: failed to record trial $trial" >&2; exit 2; }
 import json
 import os
 
@@ -257,6 +270,10 @@ def maybe_bool(name):
 
 record = {
     "schema_version": int(env("SCHEMA_VERSION")),
+    "bug": env("CANDIDATE_ID"),
+    "run": int(env("TRIAL")),
+    "verdict": env("STATUS"),
+    "wall_s": float(env("DURATION")),
     "candidate_id": env("CANDIDATE_ID"),
     "run_id": env("RUN_ID"),
     "trial": int(env("TRIAL")),
@@ -312,11 +329,15 @@ done
 
 if [ "$recorded" -ne "$RUNS" ]; then
     printf 'reproduce.sh: runner failure: recorded %d of %d trials\n' "$recorded" "$RUNS" >&2
-    exit 4
+    exit 2
 fi
 if [ "$VARIANT" = "fixed" ] && [ "$control_failed" -ne 0 ]; then
     printf 'reproduce.sh: fixed control failed; see %s\n' "$OUT_DIR" >&2
-    exit 4
+    exit 2
+fi
+if [ "$VARIANT" = "buggy" ] && [ "$reproduced" -ne "$RUNS" ]; then
+    printf 'reproduce.sh: observed the symptom in %d/%d trials\n' "$reproduced" "$RUNS" >&2
+    exit 1
 fi
 printf 'reproduce.sh: finished %d trial(s); evidence in %s\n' "$RUNS" "$OUT_DIR"
 exit 0

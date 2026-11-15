@@ -57,8 +57,8 @@ bash repro/grpc-793/reproduce.sh --variant buggy --mode deadlock --runs 1 --time
   `run-00N.stacks`.
 - `fixed`: every run returns from all three calls and prints the `ORACLE:` line;
   the runner records `completed` and the fixed control passes.
-- Runner exit code is 0 in both cases; a fixed control that fails to complete
-  is exit 4.
+- Runner exit code is 0 when the buggy symptom appears in all trials or the
+  fixed control completes; 1 means the symptom is absent and 2 means failure.
 
 Output goes to `<output>/build.log`, `run-00N.stdout`, `run-00N.stderr`,
 `run-00N.stacks`, and `runs.jsonl`, as required by `repro/README.md`.

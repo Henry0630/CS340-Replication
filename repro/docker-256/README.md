@@ -28,7 +28,7 @@ and the buggy/fixed variants differ exactly in the upstream fix. Details in
 [notes.md](notes.md).
 
 The model requires Linux (`/bin/sh`, `dd`, process pipes); it is rejected with
-exit 3 on other platforms.
+exit 2 on other platforms.
 
 ## Requirements
 
@@ -52,7 +52,8 @@ bash repro/docker-256/reproduce.sh --variant buggy --mode deadlock --runs 1 --ti
   SIGQUIT goroutine dump showing the blocked read.
 - `fixed`: the child drains stderr, `echo hello` completes stdout, `CmdStream`
   returns EOF, the harness prints `ORACLE:`, and the runner records `completed`.
-- Runner exit code is 0 in both cases; a failed fixed control is exit 4.
+- Runner exit code is 0 when the buggy symptom appears in all trials or the
+  fixed control completes; 1 means the symptom is absent and 2 means failure.
 
 ## Evidence and limitations
 

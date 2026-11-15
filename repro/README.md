@@ -32,9 +32,8 @@ summary if needed later; do not put full stdout/stderr in that tracked summary.
 
 ## Prerequisites and provenance
 
-- Run L2 on Linux using B's verified experiment environment. The repository
-  currently declares its image unverified; building it and recording its actual
-  digest/toolchain/kernel are prerequisites for experiments, not completed work.
+- Run L2 on Linux using B's verified experiment environment, documented in
+  `docs/environment.md`. Record the actual toolchain and kernel for every run.
 - Use the candidate's full pre-fix SHA for the buggy variant and its full fixing
   SHA for the fixed control. Verify checkout identity with `git rev-parse HEAD`.
 - Record Go/compiler/OS/kernel versions, container image ID and base digest,
@@ -97,16 +96,17 @@ changes the goroutine population. Keep compiler timeouts separate from run
 timeouts. A fixed control must complete correctly under the same input; if it
 also hangs, investigate the harness/environment before accepting the result.
 
-The runner returns 0 when all requested trials are recorded and classified,
-including trials where the target did not reproduce. Exit 2 means invalid
-arguments, 3 means setup/build failure, and 4 means a runner/oracle failure or a
-failed fixed control. Child exit codes remain in the log; do not equate wrapper
-success with successful bug reproduction.
+The runner returns 0 when every buggy trial reproduces the documented symptom
+or every fixed-control trial completes. Exit 1 means the buggy symptom did not
+reproduce in every requested trial. Exit 2 means invalid input, setup/build
+failure, runner/oracle failure, or a failed fixed control. Child exit codes
+remain in the log.
 
 ## Log fields
 
 Write one JSON object per trial to `runs.jsonl`. Required fields are:
 
+- `bug`, `run`, `verdict`, and `wall_s` for the week-two rubric;
 - `schema_version`, `candidate_id`, `run_id`, `trial`, `variant`, `mode`;
 - `repository`, `dataset_commit`, `checkout_commit`, `workload_kind`,
   `harness_commit`, and any applied compatibility-patch identifiers;
