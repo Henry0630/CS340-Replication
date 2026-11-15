@@ -1,0 +1,105 @@
+name: repro
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  repro:
+    name: repro-${{ matrix.candidate }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        candidate: [grpc-793, docker-256, grpc-1424]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22.4"
+      - name: Show toolchain
+        run: |
+          set -euo pipefail
+          go version
+          python3 --version
+          timeout --version | head -1
+          uname -a
+      - name: Buggy variant, 3 reproduction trials
+        run: |
+          set -euo pipefail
+          bash "repro/${{ matrix.candidate }}/reproduce.sh" \
+            --variant buggy --mode symptom --runs 3 --timeout 10 \
+            --output "results/raw/${{ matrix.candidate }}/ci-buggy"
+      - name: Detector trial
+        run: |
+          set -euo pipefail
+          bash "repro/${{ matrix.candidate }}/reproduce.sh" \
+            --variant buggy --mode deadlock --runs 1 --timeout 10 \
+            --output "results/raw/${{ matrix.candidate }}/ci-detector"
+      - name: Fixed control, 3 trials
+        run: |
+          set -euo pipefail
+          bash "repro/${{ matrix.candidate }}/reproduce.sh" \
+            --variant fixed --mode symptom --runs 3 --timeout 10 \
+            --output "results/raw/${{ matrix.candidate }}/ci-fixed"
+      - name: Verify 3/3 and fixed control
+        env:
+          CANDIDATE: ${{ matrix.candidate }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import sys
+
+          candidate = os.environ["CANDIDATE"]
+          allowed = {
+              "grpc-793": {"deadlock_reported", "timeout"},
+              "docker-256": {"timeout", "deadlock_reported"},
+              "grpc-1424": {"deadlock_reported", "timeout"},
+          }
+          rows = {}
+          for kind in ("ci-buggy", "ci-detector", "ci-fixed"):
+              path = "results/raw/%s/%s/runs.jsonl" % (candidate, kind)
+              with open(path, encoding="utf-8") as handle:
+                  rows[kind] = [json.loads(line) for line in handle if line.strip()]
+
+          buggy = rows["ci-buggy"]
+          if len(buggy) != 3:
+              sys.exit("expected 3 buggy trials, got %d" % len(buggy))
+          for row in buggy:
+              if row["trigger_observed"] is not True:
+                  sys.exit("buggy trial did not observe the trigger: %r" % row)
+              if row["status"] not in allowed[candidate]:
+                  sys.exit("unexpected buggy status %r" % row["status"])
+
+          detector = rows["ci-detector"]
+          if len(detector) != 1:
+              sys.exit("expected 1 detector trial, got %d" % len(detector))
+          if detector[0]["trigger_observed"] is not True:
+              sys.exit("detector trial did not observe the trigger: %r" % detector[0])
+          if detector[0]["status"] not in allowed[candidate]:
+              sys.exit("unexpected detector status %r" % detector[0]["status"])
+          print("detector_detected=%r (recorded, not gated)" % detector[0]["detector_detected"])
+
+          fixed = rows["ci-fixed"]
+          if len(fixed) != 3:
+              sys.exit("expected 3 fixed trials, got %d" % len(fixed))
+          for row in fixed:
+              if row["status"] != "completed":
+                  sys.exit("fixed control did not complete: %r" % row)
+
+          print("%s: buggy 3/3, detector 1/1, fixed control 3/3" % candidate)
+          PY
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repro-${{ matrix.candidate }}
+          path: results/raw/${{ matrix.candidate }}/
+          if-no-files-found: warn
