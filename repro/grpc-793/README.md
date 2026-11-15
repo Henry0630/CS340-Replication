@@ -51,9 +51,10 @@ bash repro/grpc-793/reproduce.sh --variant buggy --mode deadlock --runs 1 --time
 
 ## Expected observations
 
-- `buggy`: every run stops on the second `GracefulStop`; the Go runtime reports
-  `fatal error: all goroutines are asleep - deadlock!` (exit 2). The runner
-  records `deadlock_reported`, `trigger_observed: true`, and saves the stack in
+- `buggy`: every run stops on the second `GracefulStop`. In the pinned Docker
+  CI run, the 10 s external watchdog expired in all three symptom trials; the
+  Go runtime did not emit a global deadlock report. The runner records
+  `timeout`, `trigger_observed: true`, and saves the SIGQUIT stack in
   `run-00N.stacks`.
 - `fixed`: every run returns from all three calls and prints the `ORACLE:` line;
   the runner records `completed` and the fixed control passes.

@@ -39,8 +39,9 @@ diff is kept in [patches/upstream-fix.diff](patches/upstream-fix.diff).
 - The upstream regression test starts a real server and runs RPCs. This model
   creates a server with no listeners and no connections. The deadlock is in
   the idempotency path and does not depend on active RPCs.
-- The 10 s timeout is a bound, not the expected latency: the buggy variant
-  deadlocks immediately.
+- The 10 s timeout is a bound, not the expected latency. The buggy variant
+  reaches the second mutex acquisition immediately; the pinned Docker CI run
+  observed a 10 s watchdog timeout without a runtime global-deadlock report.
 
 ## Why not build the pinned upstream revision
 

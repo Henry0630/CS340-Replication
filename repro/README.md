@@ -2,10 +2,9 @@
 
 Owner: Haotong Xie (1230022122), role C.
 
-Week 1 delivers the [candidate selection](../docs/candidates.md) and this
-implementation contract. No per-bug executable, build success, experiment log,
-or detector result is claimed yet. The commands below define the interface
-that each week-two reproducer must implement.
+The [candidate selection](candidates.md) and this contract define role C's
+experiment. The [week-two results](week2-results.md) record the first three
+extracted-model reproductions and their fixed controls.
 
 ## Directory layout
 
@@ -147,8 +146,10 @@ Three extracted-model reproducers are implemented in this directory:
 `reproduce.sh` implementing the contract above, `metadata.json`, `notes.md`, and
 the upstream fix diff under `patches/`. `.github/workflows/repro.yml` runs three
 symptom trials, one detector trial, and three fixed-control trials per candidate
-on Linux with Go 1.22.4 (the Docker model also needs `/bin/sh` and `dd`) and
+inside the pinned Go 1.22.4 Docker image (the Docker model also needs `/bin/sh`
+and `dd`) and
 uploads `results/raw/` as a workflow artifact. The candidates are extracted
 models (`workload_kind: extracted_model`), reported separately from
 whole-application reproduction; these runs do not claim the paper's Table 8 or
-Table 12 results.
+Table 12 results. The first Docker-based run passed all three 3/3 qualifications;
+see [the measured results](week2-results.md).

@@ -1,8 +1,8 @@
 # Candidate bugs for week two
 
 Owner: Haotong Xie (1230022122), role C. Ten candidates are documented below.
-Three extracted reproducers have passed the first Linux CI qualification run;
-see [the workflow run](https://github.com/Henry0630/CS340-Replication/actions/runs/43679330473)
+Three extracted reproducers have passed the pinned Docker CI qualification run;
+see [the workflow run](https://github.com/Henry0630/CS340-Replication/actions/runs/43679686655)
 and the per-bug directories in this folder.
 
 ## Requirements and scope
@@ -214,5 +214,6 @@ contract](README.md), `metadata.json`, `notes.md`, and `patches/`.
 3/3 fixed-control trials per candidate on Linux/Go 1.22.4 and uploads the raw
 evidence as a workflow artifact. All three are reported as `extracted_model`,
 not whole-application reproductions. The first
-[`repro` CI run](https://github.com/Henry0630/CS340-Replication/actions/runs/43679330473)
-passed all three buggy 3/3 and fixed-control 3/3 checks on Linux/Go 1.22.4.
+[`repro` CI run](https://github.com/Henry0630/CS340-Replication/actions/runs/43679686655)
+passed all three buggy 3/3 and fixed-control 3/3 checks in the pinned
+Linux/Go 1.22.4 Docker image.

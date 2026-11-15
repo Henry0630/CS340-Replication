@@ -121,9 +121,11 @@ and [`repro/grpc-1424`](../repro/grpc-1424). Each has a buggy and a fixed
 variant, a contract-compliant runner, `metadata.json`, and notes that record the
 extraction and its deviations. `.github/workflows/repro.yml` runs three symptom
 trials, one detector trial, and three fixed-control trials per candidate on
-Linux/Go 1.22.4. Until that workflow passes, no L2 reproduction or
-detector-coverage result is claimed; every run is marked `extracted_model`, and
-the fixed controls only test whether the upstream fix removes the observed
+the pinned Linux/Go 1.22.4 Docker image. The
+[`repro` CI run](https://github.com/Henry0630/CS340-Replication/actions/runs/43679686655)
+passed buggy 3/3 and fixed-control 3/3 for all three. Every run is marked
+`extracted_model`, and no complete-application detector-coverage result is
+claimed. The fixed controls only test whether the upstream fix removes the observed
 symptom in the extracted harness. They do not establish the general claims
 discussed in C3.
 

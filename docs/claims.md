@@ -195,21 +195,27 @@ marked **19 blocking / 23 non-blocking** as reproduced, while the paper reports
 so including them makes the workbook's blocking flag count 21. The non-blocking
 workbook has 23 flagged rows, so that disagreement with the paper remains
 unexplained. These flags describe upstream annotations, not this team's
-completed runs — no run in this repository has yet produced a detector result.
+completed runs. Our three week-two detector observations are separately
+identified as extracted-model results in `repro/week2-results.md`.
 
 **Verdict: inconclusive on our side.** The paper's detection gap is
 established in the paper; our own coverage is **not yet measured**. The
 candidate selection and the reproducer contract are complete, and the
 experiment environment is built and measured (see `docs/environment.md`,
-measured 2026-11-14 by `docker/verify.sh` in CI), but no individual bug has
-been rebuilt at its pre-fix revision and triggered yet. We therefore quote the
-paper's detector numbers as the paper's, and state plainly that our coverage
+measured 2026-11-14 by `docker/verify.sh` in CI). Three extracted models have
+passed 3/3 symptom trials and fixed controls in the pinned image
+([`repro` CI run](https://github.com/Henry0630/CS340-Replication/actions/runs/43679686655)).
+They are not whole-application rebuilds at the pre-fix revisions, so their
+detector observations cannot estimate application-level coverage. We quote the
+paper's detector numbers as the paper's and state that our comparable coverage
 is unmeasured.
 Quoting a coverage figure of our own before that happens would be an estimate
 presented as a measurement.
 
-**Status.** L2 — pending (environment ready, runs outstanding). C's run logs
-under `repro/*/logs` are the only accepted source.
+**Status.** L2 — three extracted models measured, whole-application runs
+pending. Raw logs are artifacts of the linked `repro` CI run under
+`results/raw/<bug>/`; the observations and scope are recorded in
+`repro/week2-results.md`.
 
 ## Extension — does Go 1.22 close the loop-variable bug class?
 
@@ -242,6 +248,6 @@ extension result is claimed in this report.
 
 A number may only appear in the report if it appears in this file, with a
 pointer to where it was produced: `results/tables/*.csv` for L1,
-`repro/*/logs` for L2. Deviations are registered in `docs/discrepancy_analysis.md`, the report-facing account written by D; A owns the setup-level deviation log, which is `deviations.md` at the repository root on `a-dataset`.
+`results/raw/<bug>/` CI artifacts for L2. Deviations are registered in `docs/discrepancy_analysis.md`, the report-facing account written by D; A owns the setup-level deviation log, which is `deviations.md` at the repository root on `a-dataset`.
 Suggested wording and judgments from a review are kept distinct from new
 measurements: a reviewer's suggestion is not evidence.
