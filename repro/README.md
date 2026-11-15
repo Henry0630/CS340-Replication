@@ -138,3 +138,17 @@ A week-two reproducer is accepted only after its pinned source builds, its
 documented symptom is observed with evidence, the fixed control passes, and
 the relevant repeatability/detector protocol is logged. Week-one source
 inspection and skeleton plans alone do not satisfy that runtime acceptance.
+
+## Week-two status
+
+Three extracted-model reproducers are implemented in this directory:
+[`grpc-793`](grpc-793), [`docker-256`](docker-256), and
+[`grpc-1424`](grpc-1424). Each has a `buggy` and a `fixed` harness, a
+`reproduce.sh` implementing the contract above, `metadata.json`, `notes.md`, and
+the upstream fix diff under `patches/`. `.github/workflows/repro.yml` runs three
+symptom trials, one detector trial, and three fixed-control trials per candidate
+on Linux with Go 1.22.4 (the Docker model also needs `/bin/sh` and `dd`) and
+uploads `results/raw/` as a workflow artifact. The candidates are extracted
+models (`workload_kind: extracted_model`), reported separately from
+whole-application reproduction; these runs do not claim the paper's Table 8 or
+Table 12 results.

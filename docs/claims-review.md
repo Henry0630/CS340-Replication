@@ -6,7 +6,9 @@ Reviewed version: [d-report at 84f27fd](https://github.com/Henry0630/CS340-Repli
 The latest team division assigns the canonical claims document to D. This
 review supplies corrected wording and evidence without copying or overwriting
 D's branch. D should reconcile these items into the canonical document when
-reviewing the combined report. All local L2 experiments remain pending.
+reviewing the combined report. Local L2 experiments: three extracted-model
+reproducers are implemented in [`repro/`](../repro/); their CI verification is
+pending.
 
 Evidence: [table mapping](table_mapping.md), [inventory](../results/tables/bug_inventory.csv),
 Tables [5](../results/tables/table5.csv), [6](../results/tables/table6.csv),
@@ -110,6 +112,20 @@ selected loop-capture symptoms. Anonymous-function bugs involving other shared
 state need not disappear. Keep source, input, dependencies, and other settings
 fixed where possible; record base-image and compiler differences instead of
 asserting that two unverified image tags differ only in Go.
+
+## Week-two reproducer status
+
+Three of the ten candidates are now implemented as extracted-model reproducers:
+[`repro/grpc-793`](../repro/grpc-793), [`repro/docker-256`](../repro/docker-256),
+and [`repro/grpc-1424`](../repro/grpc-1424). Each has a buggy and a fixed
+variant, a contract-compliant runner, `metadata.json`, and notes that record the
+extraction and its deviations. `.github/workflows/repro.yml` runs three symptom
+trials, one detector trial, and three fixed-control trials per candidate on
+Linux/Go 1.22.4. Until that workflow passes, no L2 reproduction or
+detector-coverage result is claimed; every run is marked `extracted_model`, and
+the fixed controls only test whether the upstream fix removes the observed
+symptom in the extracted harness. They do not establish the general claims
+discussed in C3.
 
 ## Handoff checks
 

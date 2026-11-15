@@ -1,6 +1,6 @@
 # Week 1 candidate bugs
 
-Owner: Haotong Xie (1230022122), role C. Status: source inspection complete; builds and reproductions pending.
+Owner: Haotong Xie (1230022122), role C. Status: source inspection complete; three extracted reproducers implemented in [`repro/`](../repro/) with CI verification pending its first run.
 
 ## Requirements and scope
 
@@ -41,7 +41,7 @@ P1 prioritizes short, explicit trigger paths. Estimates assume a working Linux e
 - **Success criterion and fixed control:** The drain must reach EOF on the fixed version. On the buggy version, use an external timeout and capture the child/parent pipe wait state. Confirm the process started successfully before classifying a timeout.
 - **Estimated effort:** Half a day.
 - **Compatibility / validity risk:** The 2013 Docker tree predates modules; isolate the unchanged CmdStream function with its standard-library imports if whole-tree compilation fails, and label that run as an extracted reproducer. Shell and pipe behavior require Linux.
-- **Execution status:** Not built or run by this team.
+- **Execution status:** Implemented as an extracted model in [`repro/docker-256`](../repro/docker-256) (Linux-only); the runner and fixed control are wired into `.github/workflows/repro.yml`.
 - **Skeleton preparation target:** 20-30 minutes: add the upstream large-stderr regression input, a reader-drain completion marker, and an external timeout wrapper; preserve the original I/O order.
 
 ## docker-8909
@@ -127,7 +127,7 @@ P1 prioritizes short, explicit trigger paths. Estimates assume a working Linux e
 - **Success criterion and fixed control:** The second call must return on the fixed version. Capture the second mutex acquisition on the buggy version; no live RPC should exist that could legitimately delay graceful shutdown.
 - **Estimated effort:** Half a day.
 - **Compatibility / validity risk:** The dataset commit is a merge commit. Use the verified first parent below, not an arbitrary parent. The dataset's text patch contains only merge metadata; the upstream GitHub diff supplies the actual lock-to-unlock fix.
-- **Execution status:** Not built or run by this team.
+- **Execution status:** Implemented as an extracted model in [`repro/grpc-793`](../repro/grpc-793); the runner and fixed control are wired into `.github/workflows/repro.yml`.
 - **Skeleton preparation target:** 15-20 minutes: construct NewServer, call GracefulStop twice, place a completion marker after the second call, and bound the whole process externally.
 
 ## grpc-1459
@@ -170,12 +170,12 @@ P1 prioritizes short, explicit trigger paths. Estimates assume a working Linux e
 - **Success criterion and fixed control:** The fixed version closes doneChan; the buggy wait does not finish. The harness must wait for the expected notification: a leaked goroutine alone does not necessarily stop an entire Go process from exiting.
 - **Estimated effort:** Half a day.
 - **Compatibility / validity risk:** The old balancer interface has changed in modern grpc. Keep the historical interface. Artificial harness waiters change the runtime's deadlock-detection conditions, so symptom checks and full-application detector results must be separated.
-- **Execution status:** Not built or run by this team.
+- **Execution status:** Implemented as an extracted model in [`repro/grpc-1424`](../repro/grpc-1424); the runner and fixed control are wired into `.github/workflows/repro.yml`.
 - **Skeleton preparation target:** 20-30 minutes: reuse the upstream blocking-balancer test double, start lbWatcher, close Notify before the first address, and observe doneChan with an external watchdog.
 
-## Three first skeletons
+## Three first reproducers
 
-The first three targets are `grpc-793`, `docker-256`, and `grpc-1424`; each has a 30-minute-or-less harness-writing plan above. `etcd-6937` is an additional short-path option. The target concerns writing the harness, not guaranteeing that historical dependencies compile within 30 minutes. A source-extracted harness must preserve the original synchronization and be reported separately from whole-application reproduction.
+The first three targets are `grpc-793`, `docker-256`, and `grpc-1424`; each has a 30-minute-or-less harness-writing plan above. All three are now implemented as extracted-model reproducers in [`repro/`](../repro/); the fixed controls are part of the same runners. `etcd-6937` is an additional short-path option. The target concerns writing the harness, not guaranteeing that historical dependencies compile within 30 minutes. A source-extracted harness must preserve the original synchronization and be reported separately from whole-application reproduction.
 
 ## Deferred qualifying entries
 
@@ -194,3 +194,14 @@ The first three targets are `grpc-793`, `docker-256`, and `grpc-1424`; each has 
 - Fixing and pre-fix revisions are separated, including the merge-commit case.
 - At least three short harness-writing plans are explicit.
 - No actual reproduction, detector coverage, or environment verification is claimed.
+
+## Week 2 status
+
+Three of the ten candidates are implemented as extracted-model reproducers:
+`grpc-793`, `docker-256`, and `grpc-1424`. Each directory contains the
+buggy/fixed harness, a `reproduce.sh` implementing the [reproducer
+contract](../repro/README.md), `metadata.json`, `notes.md`, and `patches/`.
+`.github/workflows/repro.yml` runs 3/3 symptom trials, one detector trial, and
+3/3 fixed-control trials per candidate on Linux/Go 1.22.4 and uploads the raw
+evidence as a workflow artifact. All three are reported as `extracted_model`,
+not whole-application reproductions; results are pending the first CI run.
