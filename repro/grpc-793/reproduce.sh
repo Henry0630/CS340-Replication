@@ -295,7 +295,8 @@ record = {
         "gomaxprocs": int(env("GOMAXPROCS")),
         "cgo_enabled": env("CGO_ENABLED"),
         "gotoolchain": env("GOTOOLCHAIN"),
-        "container_image": None,
+        "container_image": os.environ.get("CS340_IMAGE_REF"),
+        "container_image_id": os.environ.get("CS340_IMAGE_ID"),
         "container_digest": None,
     },
     "command": [

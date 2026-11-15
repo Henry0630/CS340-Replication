@@ -20,32 +20,38 @@ jobs:
         candidate: [grpc-793, docker-256, grpc-1424]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "1.22.4"
-      - name: Show toolchain
+      - name: Build pinned experiment image
         run: |
           set -euo pipefail
-          go version
-          python3 --version
-          timeout --version | head -1
-          uname -a
+          docker build -t cs340-repro:go1.22 .
+          docker image inspect cs340-repro:go1.22 --format '{{.Id}}'
+          echo "CS340_IMAGE_ID=$(docker image inspect cs340-repro:go1.22 --format '{{.Id}}')" >> "$GITHUB_ENV"
+          docker run --rm cs340-repro:go1.22 sh -c 'go version; python3 --version; uname -a'
       - name: Buggy variant, 3 reproduction trials
         run: |
           set -euo pipefail
-          bash "repro/${{ matrix.candidate }}/reproduce.sh" \
+          docker run --rm -v "$PWD:/repo" -w /repo \
+            -e CS340_IMAGE_REF=cs340-repro:go1.22 \
+            -e CS340_IMAGE_ID="$CS340_IMAGE_ID" \
+            cs340-repro:go1.22 bash "repro/${{ matrix.candidate }}/reproduce.sh" \
             --variant buggy --mode symptom --runs 3 --timeout 10 \
             --output "results/raw/${{ matrix.candidate }}/ci-buggy"
       - name: Detector trial
         run: |
           set -euo pipefail
-          bash "repro/${{ matrix.candidate }}/reproduce.sh" \
+          docker run --rm -v "$PWD:/repo" -w /repo \
+            -e CS340_IMAGE_REF=cs340-repro:go1.22 \
+            -e CS340_IMAGE_ID="$CS340_IMAGE_ID" \
+            cs340-repro:go1.22 bash "repro/${{ matrix.candidate }}/reproduce.sh" \
             --variant buggy --mode deadlock --runs 1 --timeout 10 \
             --output "results/raw/${{ matrix.candidate }}/ci-detector"
       - name: Fixed control, 3 trials
         run: |
           set -euo pipefail
-          bash "repro/${{ matrix.candidate }}/reproduce.sh" \
+          docker run --rm -v "$PWD:/repo" -w /repo \
+            -e CS340_IMAGE_REF=cs340-repro:go1.22 \
+            -e CS340_IMAGE_ID="$CS340_IMAGE_ID" \
+            cs340-repro:go1.22 bash "repro/${{ matrix.candidate }}/reproduce.sh" \
             --variant fixed --mode symptom --runs 3 --timeout 10 \
             --output "results/raw/${{ matrix.candidate }}/ci-fixed"
       - name: Verify 3/3 and fixed control
