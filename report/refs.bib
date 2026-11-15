@@ -1,0 +1,86 @@
+% References for the replication report.
+% Week 1: the target paper and the six Go programs whose bugs we study.
+% Week 2: the Go 1.22 release notes and the loop-variable transition note,
+% which the extension experiment depends on.
+% Members add their own entries as the work proceeds.
+
+@inproceedings{go-study,
+  title     = {Understanding Real-World Concurrency Bugs in Go},
+  author    = {Tengfei Tu and Xiaoyu Liu and Linhai Song and Yiying Zhang},
+  booktitle = {Proceedings of the 24th International Conference on Architectural Support for Programming Languages and Operating Systems (ASPLOS 19)},
+  pages     = {869--882},
+  year      = {2019},
+  publisher = {ACM},
+  doi       = {10.1145/3297858.3304069},
+  url       = {https://songlh.github.io/paper/go-study.pdf}
+}
+
+@misc{go-lang,
+  title  = {The Go Programming Language},
+  author = {{The Go Authors}},
+  year   = {2009},
+  url    = {https://go.dev/ref/spec}
+}
+
+@misc{go122,
+  title  = {Go 1.22 Release Notes},
+  author = {{The Go Authors}},
+  year   = {2024},
+  url    = {https://go.dev/doc/go1.22}
+}
+
+@misc{loopvar,
+  title  = {Go 1.22 and the new loop variable semantics},
+  author = {{The Go Authors}},
+  year   = {2023},
+  url    = {https://go.dev/blog/loopvar-preview}
+}
+
+@misc{docker,
+  title  = {Docker: containerized deployment},
+  author = {{Docker, Inc.}},
+  year   = {2013},
+  url    = {https://github.com/moby/moby}
+}
+
+@misc{kubernetes,
+  title  = {Kubernetes},
+  author = {{The Kubernetes Authors}},
+  year   = {2014},
+  url    = {https://github.com/kubernetes/kubernetes}
+}
+
+@misc{grpc-go,
+  title  = {gRPC-Go: gRPC for Go},
+  author = {{The gRPC-Go Authors}},
+  year   = {2015},
+  url    = {https://github.com/grpc/grpc-go}
+}
+
+@misc{cockroachdb,
+  title  = {CockroachDB: a scalable, available, transactional database},
+  author = {{Cockroach Labs}},
+  year   = {2014},
+  url    = {https://github.com/cockroachdb/cockroach}
+}
+
+@misc{etcd,
+  title  = {etcd: a reliable, distributed key-value store for the most critical data of a distributed system},
+  author = {{The etcd Authors}},
+  year   = {2014},
+  url    = {https://github.com/etcd-io/etcd}
+}
+
+@misc{boltdb,
+  title  = {Bolt: an embedded key/value database for Go},
+  author = {{Ben Johnson}},
+  year   = {2013},
+  url    = {https://github.com/boltdb/bolt}
+}
+
+@misc{upstream-dataset,
+  title  = {go-concurrency-bugs: dataset and study artifacts for Understanding Real-World Concurrency Bugs in Go},
+  author = {{Tu, Liu, Song, Zhang}},
+  year   = {2019},
+  url    = {https://github.com/system-pclub/go-concurrency-bugs}
+}

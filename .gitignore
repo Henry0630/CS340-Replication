@@ -37,3 +37,6 @@ desktop.ini
 
 # generated environment snapshots (docs/environment.md is the source of truth)
 results/env-*.md
+
+# CI / local verify output (published copies live under results/ci/)
+env-L2.md

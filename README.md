@@ -42,16 +42,28 @@ Shareable docs: `docs/team_division.md` is the 分工方案; regenerate the PDF 
 
 ## Setup
 
-Requirements: `python3` (stdlib only — no pandas/openpyxl needed), `git`,
-`curl`. For L2 (reproducing bugs and running the detectors) you need **Docker
-with Linux containers**; the image, the pinned versions and the exact steps are
-in `docs/env-setup.md`. Status: the image has **not been built yet on any
-machine** — do not quote environment numbers in the report before
-`docs/env-setup.md` §6 returns them.
+Requirements: `python3` (stdlib only for the L1 pipeline — no
+pandas/openpyxl needed), `git`, `curl`.
+The figure script additionally needs `matplotlib`. L1 runs
+anywhere in **under 2 seconds**.
+
+L2 (reproducing bugs and running the detectors) runs in the pinned container.
+You do **not** need Docker locally: the image is built and measured on a clean
+GitHub Actions runner (`.github/workflows/env.yml`), or in a devcontainer
+(`.devcontainer/devcontainer.json`) / any machine with Docker:
+
+```bash
+bash docker/verify.sh        # builds go1.22 + go1.21, measures everything
+bash docker/verify.sh --quick   # go1.22 only
+```
+
+Measured environment (kernel, Go, gcc, image digests, build times) lives in
+`docs/environment.md`; the raw block is committed under `results/ci/`.
 
 ```bash
 make setup     # fetch the dataset snapshot if data/bug_table.xlsx is missing
 make tables    # recompute every table and print paper-vs-ours comparison
+make env       # print this machine's toolchain versions
 ```
 
 No `make` on Windows (git-bash has none): run `python scripts/fetch_dataset.py`
@@ -80,8 +92,51 @@ from two BoltDB blocking bugs that are missing from the released snapshot — se
 ```bash
 make setup      # download data/bug_table.xlsx (pinned upstream commit)
 make tables     # L1: recompute Tables 5, 6, 7, 9, 10
+make env        # this machine's toolchain versions
+make docker-build   # build cs340-repro:go1.22 locally (needs Docker)
+make docker-smoke   # uname + go version + gcc inside that image
+make figures    # regenerate report/figures/*.png from those CSVs (needs matplotlib)
 make clean      # remove results/raw and __pycache__
 ```
+
+### Expected outputs and runtimes
+
+| Command | Expected output | Runtime |
+|---|---|---|
+| `python scripts/fetch_dataset.py --check` | `sha256=a0e5f010… OK` | < 1 s (already present) |
+| `python scripts/parse_dataset.py` | 6 CSVs in `results/tables/`, deltas vs the paper printed | **< 2 s** |
+| `python scripts/check_env.py` | a markdown table of host/toolchain versions | < 2 s |
+| `bash docker/verify.sh` | the L2 block that fills `docs/environment.md` | **34 s cold / 19 s warm** per image, plus the 1.21 image |
+| `docker build .` | ends with `smoke ok 1` and `go version go1.22.4 linux/amd64` | 19–34 s, image 944 MB |
+
+### Building the report
+
+The report is LaTeX (`report/main.tex`, `report/refs.bib`).
+Compile it with any TeX distribution; the Chinese member names need a
+CJK-capable engine, so use **XeLaTeX**:
+
+```bash
+cd report
+xelatex main && bibtex main && xelatex main && xelatex main
+```
+
+The figures are read from `report/figures/`; run `make figures` first if they
+are missing. A cover page is optional: place a PDF at `report/cover.pdf` and it
+becomes page 1; the document compiles with or without it.
+
+## Reproducibility checklist
+
+What the graders' criterion (25 %) asks for, and where it lives:
+
+| Requirement | Where |
+|---|---|
+| Builds and runs on a clean machine from the README alone | this file + `.github/workflows/env.yml` (CI proves it on every push) |
+| OS, kernel, compiler and tools pinned | `Dockerfile` (digests), `docs/environment.md` (measured table) |
+| Workloads and inputs obtained by a script | `scripts/fetch_dataset.py` (dataset pinned by commit + sha256) |
+| Settings that affect results recorded | `docs/environment.md` (`GOMAXPROCS`, `CGO_ENABLED`, `GOTOOLCHAIN`, `-race`) |
+| No hard-coded paths | all scripts resolve paths relative to the repo |
+| Original code credited, starting commit recorded | "Credits and starting point" below |
+| Data as shipped upstream, unmodified | `data/bug_table.xlsx`, hash recorded |
 
 ## Credits and starting point
 
@@ -99,10 +154,10 @@ make clean      # remove results/raw and __pycache__
 
 | Member | Student ID | Role |
 |---|---|---|
-| _TBD_ | _TBD_ | A — data pipeline & statistics |
+| 辛相天 | 1240006592 | A — data pipeline & statistics |
 | 张歆海 | 1240012291 | B — build & run environment (Docker, Go toolchain) |
-| _TBD_ | _TBD_ | C — bug reproduction & detector experiments |
-| _TBD_ | _TBD_ | D — analysis, report & presentation |
+| 谢昊桐 | 1230022122 | C — bug reproduction & detector experiments |
+| 郭子嘉 | 1240015875 | D — analysis, report & presentation |
 
 ## AI usage
 
