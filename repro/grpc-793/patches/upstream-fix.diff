@@ -1,0 +1,50 @@
+Upstream fix (provenance only; not applied by reproduce.sh).
+
+commit 5a547ed72c09faf4050739d54caea1d51f4d276d
+Author: Qi Zhao <toqizhao@gmail.com>
+Date:   Fri Jul 29 17:00:30 2016 +0000
+
+    Merge pull request #795 from tamird/graceful-deadlock
+
+    Fix deadlock when GracefulStop()ing multiple times
+
+diff --git a/server.go b/server.go
+@@ -798,7 +798,7 @@ func (s *Server) Stop() {
+ func (s *Server) GracefulStop() {
+ 	s.mu.Lock()
+ 	if s.drain == true || s.conns == nil {
+-		s.mu.Lock()
++		s.mu.Unlock()
+ 		return
+ 	}
+ 	s.drain = true
+
+diff --git a/test/end2end_test.go b/test/end2end_test.go
+@@ -553,6 +553,27 @@ func testTimeoutOnDeadServer(t *testing.T, e env) {
+ 	awaitNewConnLogOutput()
+ }
+ 
++func TestServerGracefulStopIdempotent(t *testing.T) {
++	defer leakCheck(t)()
++	for _, e := range listTestEnv() {
++		if e.name == "handler-tls" {
++			continue
++		}
++		testServerGracefulStopIdempotent(t, e)
++	}
++}
++
++func testServerGracefulStopIdempotent(t *testing.T, e env) {
++	te := newTest(t, e)
++	te.userAgent = testAppUA
++	te.startServer(&testServer{security: e.security})
++	defer te.tearDown()
++
++	for i := 0; i < 3; i++ {
++		te.srv.GracefulStop()
++	}
++}
++
+ func TestServerGoAway(t *testing.T) {
+ 	defer leakCheck(t)()
+ 	for _, e := range listTestEnv() {

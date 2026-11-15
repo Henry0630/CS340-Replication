@@ -1,0 +1,32 @@
+Upstream fix (provenance only; not applied by reproduce.sh).
+
+commit 4e56696c6c5a8cd7b711a1eb8936463559361da5
+    Fix a goroutine leak in DialContext (#1424)
+
+diff --git a/clientconn.go b/clientconn.go
+@@ func (cc *ClientConn) lbWatcher(doneChan chan struct{}) {
++	defer func() {
++		if doneChan != nil {
++			close(doneChan)
++		}
++	}()
++
+ 	for addrs := range cc.dopts.balancer.Notify() {
+ 		var add []Address
+
+diff --git a/clientconn_test.go b/clientconn_test.go
+@@ +func TestClientLBWatcherWithClosedBalancer(t *testing.T) {
++	b := newBlockingBalancer()
++	cc := &ClientConn{
++		conns: make(map[Address]*addrConn),
++		dopts: dialOptions{balancer: b},
++	}
++	doneChan := make(chan struct{})
++	go cc.lbWatcher(doneChan)
++	b.Close()
++	select {
++	case <-doneChan:
++	case <-time.After(5 * time.Second):
++		t.Fatal("lbWatcher did not return after the balancer was closed")
++	}
++}

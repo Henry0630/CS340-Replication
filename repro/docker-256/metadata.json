@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "candidate_id": "docker-256",
+  "repository": "https://github.com/moby/moby",
+  "bug_id": "moby/moby#256",
+  "dataset": {
+    "upstream_commit": "f2655063a2278cff64a51121b73801eda05fdcfa",
+    "source_sheet": "blocking",
+    "source_row": 18,
+    "dataset_commit": "58befe3081726ef74ea09198cd9488fb42c51f51",
+    "reproduced_flag": 1,
+    "patch_size_lines": 8,
+    "shared_memory": 0,
+    "message_passing": 1,
+    "cause_labels": ["MessagingLib"],
+    "fix_labels": ["Add"]
+  },
+  "fixing_commit": "58befe3081726ef74ea09198cd9488fb42c51f51",
+  "buggy_checkout_commit": "1d6929c8bc6cbc5ad63dce083869460b6bb377ad",
+  "source_file": "archive.go",
+  "workload_kind": "extracted_model",
+  "modes": ["symptom", "deadlock"],
+  "symptom": "a child that fills its stderr pipe deadlocks CmdStream's stdout drain",
+  "expected_buggy_status": ["timeout", "deadlock_reported"],
+  "expected_fixed_status": ["completed"],
+  "requires_linux": true
+}

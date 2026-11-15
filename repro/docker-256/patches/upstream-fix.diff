@@ -1,0 +1,45 @@
+Upstream fix (provenance only; not applied by reproduce.sh).
+
+commit 58befe3081726ef74ea09198cd9488fb42c51f51
+    Fix a deadlock in CmdStream
+
+diff --git a/archive.go b/archive.go
+@@ func CmdStream(cmd *exec.Cmd) (io.Reader, error) {
+ 	if err := cmd.Start(); err != nil {
+ 		return nil, err
+ 	}
++	errChan := make(chan []byte)
++	go func() {
++		errText, err := ioutil.ReadAll(stderr)
++		if err != nil {
++			errText = []byte("(...couldn't fetch stderr: " + err.Error() + ")")
++		}
++		errChan <- errText
++	}()
+ 	pipeR, pipeW := io.Pipe()
+ 	go func() {
+-		if _, err := io.Copy(pipeW, stdout); err != nil {
++		_, err := io.Copy(pipeW, stdout)
++		if err != nil {
+ 			pipeW.CloseWithError(err)
+ 		}
+-		if errText, e := ioutil.ReadAll(stderr); e != nil {
+-			log.Printf("error while reading from stderr: %v", e)
+-			errText = []byte("(...couldn't fetch stderr: " + e.Error() + ")")
+-		}
++		errText := <-errChan
+ 		if err := cmd.Wait(); err != nil {
+ 			// FIXME: we are deliberately not closing the pipe in the error case
+ 			pipeW.CloseWithError(errors.New(err.Error() + ": " + string(errText)))
+
+diff --git a/archive_test.go b/archive_test.go
+@@ +func TestCmdStreamLargeStderr(t *testing.T) {
++	cmd := exec.Command("/bin/sh", "-c", "dd if=/dev/zero bs=1k count=1000 of=/dev/stderr; echo hello")
++	out, err := CmdStream(cmd)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if _, err := io.Copy(ioutil.Discard, out); err != nil {
++		t.Fatal(err)
++	}
++}

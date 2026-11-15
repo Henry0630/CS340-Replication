@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "candidate_id": "grpc-793",
+  "repository": "https://github.com/grpc/grpc-go",
+  "bug_id": "grpc/grpc-go#793",
+  "dataset": {
+    "upstream_commit": "f2655063a2278cff64a51121b73801eda05fdcfa",
+    "source_sheet": "blocking",
+    "source_row": 79,
+    "dataset_commit": "5a547ed72c09faf4050739d54caea1d51f4d276d",
+    "reproduced_flag": 1,
+    "patch_size_lines": 1,
+    "shared_memory": 1,
+    "message_passing": 0,
+    "cause_labels": ["Mutex"],
+    "fix_labels": ["Change"]
+  },
+  "fixing_commit": "5a547ed72c09faf4050739d54caea1d51f4d276d",
+  "buggy_checkout_commit": "7c6103d142da5fd11a36964c3a42cf698056b00b",
+  "source_file": "server.go",
+  "workload_kind": "extracted_model",
+  "modes": ["symptom", "deadlock"],
+  "symptom": "the second GracefulStop call blocks forever on a double mutex lock",
+  "expected_buggy_status": ["deadlock_reported", "timeout"],
+  "expected_fixed_status": ["completed"],
+  "requires_linux": false
+}
