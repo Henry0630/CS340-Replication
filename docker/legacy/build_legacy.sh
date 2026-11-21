@@ -47,8 +47,13 @@ while read -r import_path ref rest; do
   else
     mkdir -p "$(dirname "$dest")"
     rm -rf "$dest"
-    git clone --quiet "https://github.com/${import_path}.git" "$dest" || {
-      echo "- clone: **FAILED**"; status=1; continue; }
+    # The import path usually already starts with the host (github.com/owner/repo).
+    case "$import_path" in
+      *.*/*) url="https://${import_path}.git" ;;
+      *)     url="https://github.com/${import_path}.git" ;;
+    esac
+    git clone --quiet "$url" "$dest" || {
+      echo "- clone \`$url\`: **FAILED**"; status=1; continue; }
   fi
 
   git -C "$dest" checkout --quiet "$ref" 2>/dev/null || {
