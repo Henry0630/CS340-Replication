@@ -238,6 +238,9 @@ Base image, control & \nolinkurl{c6a5b9308b3f3095e8fde83c8bf4d68bd101fce606c1a0a
 Image size / build time & 944\,MB, 34\,s cold and 19\,s warm (Go~1.22); 934\,MB, 32\,s cold and 17\,s warm (Go~1.21) \\
 Compiler (\texttt{gcc --version}) & \texttt{gcc (Debian 12.2.0-14) 12.2.0} \\
 Race detector & verified: the build-time smoke test reports \texttt{DATA RACE} \\
+Legacy toolchain & \\\texttt{go1.12.17 linux/amd64} with \\\texttt{GO111MODULE=off} and \\\texttt{GOPATH=/work/gopath} \\
+Legacy base image & \\\nolinkurl{734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc} (bookworm-slim) \\
+Verified legacy target & \\\texttt{github.com/boltdb/bolt} \\\texttt{v1.3.1} (2017-07-17), pre-modules, build OK \\
 \texttt{GOMAXPROCS} & 4, fixed in the \texttt{Dockerfile} \\
 \texttt{CGO\_ENABLED} & 1 (the race detector requires cgo) \\
 \texttt{GOTOOLCHAIN} & \texttt{local}, so the image's own toolchain is used \\
@@ -555,6 +558,14 @@ the paper, not measurements of this team. What the runs do establish is that the
 reproduction harness works end to end --- the symptom reproduces, the fix removes
 it, and the detector's verdict is recorded --- which is the precondition for the
 application-level measurement the next round has to carry out.
+
+The piece that was missing for that step --- a build path for the pre-modules
+upstream revisions --- now exists. The legacy toolchain in
+Table\ref{tab:environment} builds those trees without patching a single line
+of upstream source, and it has already been verified against one of them:
+BoltDB at v1.3.1 compiles in the pinned image. What is still missing is a bug
+that is rebuilt as a whole application and triggered, and that is the remaining
+step for this week.
 
 One discrepancy is already visible in the upstream annotations and is
 recorded now rather than later: the commit-backed inventory marks 19

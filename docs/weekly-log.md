@@ -55,6 +55,7 @@ this table together, so every line here must correspond to a real commit.
 | 3 | 2026-11-21 | 郭子嘉 (D) | `docs: add the week-three plan and update the weekly log` | Contribution Statement |
 | 3 | 2026-11-21 | 郭子嘉 (D) | `report: add the evidence-by-layer table to the results` | Results |
 | 3 | 2026-11-21 | 郭子嘉 (D) | `meta: wire the dataset regression suite into make test` | — |
+| 3 | 2026-11-21 | 郭子嘉 (D) | `report: record the pinned legacy toolchain in the environment table` | Reproduction Setup |
 
 
 
