@@ -49,6 +49,29 @@ Measured 2026-11-14 by `docker/verify.sh` in CI; raw block:
 | Runs per bug | ≥ 3 for statistics; 100 for the Table 12 protocol |
 | Wall time per reproducer | _to fill in week 3, per bug, in the README_ |
 
+### Legacy toolchain — pre-modules upstream revisions
+
+The paper studied 2015–2018 code, which predates Go modules: those trees expect
+GOPATH + vendored dependencies and do not build with the modern toolchain above.
+`docker/legacy/` pins an old compiler and reconstructs a GOPATH workspace from a
+manifest, so no upstream source is ever patched by hand.
+
+| Item | Value |
+|---|---|
+| Measurement | 2026-11-21, CI job `legacy` — `results/ci/legacy-20261121T0655Z.md` |
+| Base image | `debian@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc` (bookworm-slim) |
+| Go toolchain | `go1.12.17 linux/amd64`, tarball pinned by sha256 `a53dd476129d496047487bfd53d021dd17e0c96895865a0e7d0469ce3db8c8d2` |
+| Build mode | `GO111MODULE=off`, `GOPATH=/work/gopath`, `CGO_ENABLED=1` |
+| Compiler | `gcc (Debian 12.2.0-14+deb12u1) 12.2.0` |
+| Verified target | `github.com/boltdb/bolt` `v1.3.1` → commit `2f1ce7a837dcb8da3ec595b1dac9d0632f0f99e8` (2017-07-17), `pre-modules: yes`, **build OK** |
+| Add a target | one line in `docker/legacy/manifest` (`<import-path> <ref>`); the script prints the resolved SHA so the report can cite it |
+
+Deviation to record: the pinned toolchain (1.12.17) is newer than what the
+original developers used (the bugs are from 2015–2018), because older toolchains
+no longer run on a current libc/Debian. It is still pre-modules, which is what
+those trees require; the exact compiler used per bug is recorded in each
+`repro/<bug>/notes.md`.
+
 ### Three ways to reproduce this table
 
 1. **CI (default, no local install):** push a change to `Dockerfile` / `docker/`,
