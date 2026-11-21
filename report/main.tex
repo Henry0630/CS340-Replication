@@ -292,6 +292,46 @@ number. An unlabelled run log is not a result.
 
 \section{Results}
 \label{sec:results}
+\subsection{Which layer each number belongs to}
+
+The numbers in this report come from three kinds of evidence, and they are
+not equally strong. Table\ref{tab:layers} states, for each layer, what was
+actually run and whether the result can be compared with the paper directly.
+Every level-2 number quoted below carries its layer.
+
+\begin{table}[h]
+\centering
+\caption{Evidence by layer. Only the first and the last two rows can be
+compared with the paper directly; the middle row is a working harness, not
+yet a measurement of the paper's setting.}
+\label{tab:layers}
+\begin{tabular}{@{}p{0.20\textwidth}p{0.44\textwidth}p{0.24\textwidth}@{}}
+\toprule
+Layer & What was run & Comparable with the paper \\
+\midrule
+L1 --- recomputed tables \\
+Tables~5, 6, 7, 9 and~10 recomputed from the released workbook by our own
+parser; under the paper's assignment convention every cell matches the paper\\
+Yes, cell by cell \\
+\addlinespace
+L2 --- extracted models \\
+Three blocking bugs rebuilt as minimal models in the pinned image: the symptom
+reproduces in 3 of 3 trials, the fixed control in 3 of 3, and the runtime
+detector reports a deadlock for one of the three \\
+No: the workload is not the original application \\
+\addlinespace
+L2 --- original applications \\
+The upstream revision rebuilt as the whole application, with the dependency
+compatibility layer pinned in the image \\
+Yes, once measured \\
+\addlinespace
+Extension --- Go 1.21 vs 1.22 \\
+The same bug under two toolchains; the protocol is written, no data yet \\
+Yes, once measured \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 
 \subsection{Level 1: the taxonomy reproduces}
 
