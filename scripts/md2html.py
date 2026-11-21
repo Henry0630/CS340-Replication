@@ -141,23 +141,41 @@ def convert(md):
             continue
 
         m = re.match(r"^\s*([-*+])\s+(.*)$", line)
+        kind = "ul" if m else None
+        if not m:
+            m = re.match(r"^\s*(\d+)[.)]\s+(.*)$", line)
+            kind = "ol" if m else None
         if m:
-            if in_list != "ul":
-                close_list()
-                out.append("<ul>")
-                in_list = "ul"
-            out.append("<li>%s</li>" % inline(m.group(2)))
+            # Collect continuation lines: hard-wrapped list items are normal in
+            # Chinese docs ("1. 长句…\n   第二行…"). Without this the second line
+            # becomes a stray paragraph and the numbering restarts.
+            buf = [m.group(2)]
             i += 1
-            continue
-
-        m = re.match(r"^\s*(\d+)[.)]\s+(.*)$", line)
-        if m:
-            if in_list != "ol":
+            while i < len(lines):
+                nxt = lines[i]
+                if not nxt.strip():
+                    j = i + 1
+                    while j < len(lines) and not lines[j].strip():
+                        j += 1
+                    if (j < len(lines)
+                            and re.match(r"^\s{2,}\S", lines[j])
+                            and not re.match(r"^\s*([-*+]|\d+[.)])\s+", lines[j])):
+                        buf.append(lines[j].strip())
+                        i = j + 1
+                        continue
+                    break
+                if re.match(r"^\s*([-*+]|\d+[.)])\s+", nxt):
+                    break
+                if re.match(r"^\s{2,}\S", nxt):
+                    buf.append(nxt.strip())
+                    i += 1
+                    continue
+                break
+            if in_list != kind:
                 close_list()
-                out.append("<ol>")
-                in_list = "ol"
-            out.append("<li>%s</li>" % inline(m.group(2)))
-            i += 1
+                out.append("<%s>" % kind)
+                in_list = kind
+            out.append("<li>%s</li>" % inline(" ".join(buf)))
             continue
 
         if line.strip().startswith(">"):
@@ -167,6 +185,20 @@ def convert(md):
             continue
 
         if not line.strip():
+            # A blank line does not necessarily end a list: authors write
+            # "1. ... \n\n 2. ..." all the time. Look ahead and keep the list
+            # open when the next non-blank line continues it, otherwise every
+            # numbered item restarts at 1.
+            j = i + 1
+            while j < len(lines) and not lines[j].strip():
+                j += 1
+            nxt = lines[j] if j < len(lines) else ""
+            if in_list == "ul" and re.match(r"^\s*([-*+])\s+", nxt):
+                i += 1
+                continue
+            if in_list == "ol" and re.match(r"^\s*(\d+)[.)]\s+", nxt):
+                i += 1
+                continue
             close_list()
             i += 1
             continue
