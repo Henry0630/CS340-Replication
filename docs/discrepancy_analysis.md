@@ -137,16 +137,37 @@ These flags are upstream annotations. They are **not** evidence that this team
 has reproduced anything. No detector result has yet been produced by this
 repository.
 
-## D4 — Detector coverage (L2, pending)
+## D4 — Detector coverage (L2, partially measured)
 
-The paper's numbers: deadlock detector 2/21 blocking bugs ($5.3, Table 8);
-race detector 10/20 non-blocking bugs within 100 runs each ($6.3, Table 12).
+The paper's numbers: deadlock detector 2/21 blocking bugs (5.3, Table 8);
+race detector 10/20 non-blocking bugs within 100 runs each (6.3, Table 12).
 The race detector detects exactly half of that sample.
 
-Our own coverage is **not yet measured**. It will be quoted only from
-`repro/*/logs`, with the Go version, image digest, `GOMAXPROCS`,
-`CGO_ENABLED` and the run count recorded alongside each number, as
+Our own coverage is measured on three **extracted models** of blocking bugs, run
+in the pinned `cs340-repro:go1.22` image (Go 1.22.4) on the CI runner:
+
+| Model | Symptom trials | Fixed controls | Runtime detector report |
+|---|---|---|---|
+| `grpc-793` | 3/3 | 3/3 completed | none |
+| `docker-256` | 3/3 | 3/3 completed | none |
+| `grpc-1424` | 3/3 | 3/3 completed | `deadlock_reported` |
+
+The numbers are quoted from `repro/week2-results.md`, with the raw per-trial
+logs under `repro/` and the Go version, image digest, `GOMAXPROCS`,
+`CGO_ENABLED` and the run count recorded alongside them, as
 `docs/environment.md` and `repro/README.md` require.
+
+**Why this does not estimate the paper's Table 8 coverage.** These are
+`extracted_model` runs, not whole-application rebuilds: they copy the relevant
+upstream synchronisation out of the original program and replace the
+surrounding application dependencies, because the pinned upstream revisions
+predate Go modules and cannot be built with Go 1.22 without an unrecorded
+compatibility layer. In `grpc-1424` the harness blocks its last goroutine to
+observe the missing notification, which can make the runtime report a global
+deadlock although the original application symptom is a goroutine leak. The
+paper's 2/21 blocking and 10/20 race-detector figures therefore remain the
+paper's, and the workbook's 19/23 reproduced flags remain upstream
+annotations rather than our run counts.
 
 ## D5 — Claims we do not make
 
