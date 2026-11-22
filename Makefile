@@ -4,12 +4,13 @@ PY ?= python
 GO22 ?= golang:1.22.4-bookworm@sha256:0c02666907338370a3272af1b4642a184968911d2317f0bd010dcef89a081d6f
 GO21 ?= golang:1.21.13-bookworm@sha256:c6a5b9308b3f3095e8fde83c8bf4d68bd101fce606c1a0a1394522542509dda9
 
-.PHONY: help setup check tables figures env verify docker-build docker-smoke clean
+.PHONY: help setup check tables test figures env verify docker-build docker-smoke clean
 
 help:
 	@echo "make setup         - fetch and verify the pinned dataset (data/bug_table.xlsx)"
 	@echo "make check         - verify the dataset hash"
 	@echo "make tables        - recompute Tables 5/6/7/9/10 and compare with the paper"
+	@echo `make test          - run the dataset pipeline regression suite`
 	@echo "make figures       - regenerate report/figures/*.png from results/tables/*.csv"
 	@echo "make env           - print machine/toolchain facts for docs/environment.md"
 	@echo "make verify        - build both images and save the measurement to results/local/"
@@ -25,6 +26,9 @@ check:
 
 tables:
 	$(PY) scripts/parse_dataset.py
+
+test:
+	$(PY) -m unittest discover -s tests -v
 
 figures:
 	$(PY) scripts/make_figures.py

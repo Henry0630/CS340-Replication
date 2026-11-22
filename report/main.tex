@@ -48,8 +48,8 @@ by exactly two documented causes: two issue-only rows that carry no commit
 hash, and one record that carries two cause labels where the paper assigns
 one. Under the paper's own assignment convention our recomputation matches
 paper Tables~5, 6 and~7 cell by cell, and Tables~9 and~10 match without
-qualification. Level-2 detector coverage is not yet measured and is reported
-as such.
+qualification. Level-2 coverage is measured on three extracted models of the
+bugs, and the report states exactly how far that measurement reaches.
 \end{abstract}
 
 \section{Introduction and Claims}
@@ -110,8 +110,10 @@ built-in concurrency detectors catch only a minority of the bugs they are
 aimed at: the paper reports the deadlock detector firing on 2 of 21
 reproduced blocking bugs, and the race detector on 10 of 20 reproduced
 non-blocking bugs within 100 runs each --- exactly half of that sample.
-\emph{Verdict: inconclusive on our side.} Our own coverage is not yet
-measured, because no bug has been built and triggered; see
+\emph{Verdict: supported in the paper, inconclusive for us.} Our own
+measurement covers three extracted models of blocking bugs, one of which
+produced a runtime deadlock report. That sample is too small, and too far
+from the original applications, to estimate the paper's Table~8 coverage; see
 \S\ref{sec:results}.
 
 \subsection{Scope}
@@ -236,6 +238,9 @@ Base image, control & \nolinkurl{c6a5b9308b3f3095e8fde83c8bf4d68bd101fce606c1a0a
 Image size / build time & 944\,MB, 34\,s cold and 19\,s warm (Go~1.22); 934\,MB, 32\,s cold and 17\,s warm (Go~1.21) \\
 Compiler (\texttt{gcc --version}) & \texttt{gcc (Debian 12.2.0-14) 12.2.0} \\
 Race detector & verified: the build-time smoke test reports \texttt{DATA RACE} \\
+Legacy toolchain & \\\texttt{go1.12.17 linux/amd64} with \\\texttt{GO111MODULE=off} and \\\texttt{GOPATH=/work/gopath} \\
+Legacy base image & \\\nolinkurl{734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc} (bookworm-slim) \\
+Verified legacy target & \\\texttt{github.com/boltdb/bolt} \\\texttt{v1.3.1} (2017-07-17), pre-modules, build OK \\
 \texttt{GOMAXPROCS} & 4, fixed in the \texttt{Dockerfile} \\
 \texttt{CGO\_ENABLED} & 1 (the race detector requires cgo) \\
 \texttt{GOTOOLCHAIN} & \texttt{local}, so the image's own toolchain is used \\
@@ -290,6 +295,46 @@ number. An unlabelled run log is not a result.
 
 \section{Results}
 \label{sec:results}
+\subsection{Which layer each number belongs to}
+
+The numbers in this report come from three kinds of evidence, and they are
+not equally strong. Table\ref{tab:layers} states, for each layer, what was
+actually run and whether the result can be compared with the paper directly.
+Every level-2 number quoted below carries its layer.
+
+\begin{table}[h]
+\centering
+\caption{Evidence by layer. Only the first and the last two rows can be
+compared with the paper directly; the middle row is a working harness, not
+yet a measurement of the paper's setting.}
+\label{tab:layers}
+\begin{tabular}{@{}p{0.20\textwidth}p{0.44\textwidth}p{0.24\textwidth}@{}}
+\toprule
+Layer & What was run & Comparable with the paper \\
+\midrule
+L1 --- recomputed tables \\
+Tables~5, 6, 7, 9 and~10 recomputed from the released workbook by our own
+parser; under the paper's assignment convention every cell matches the paper\\
+Yes, cell by cell \\
+\addlinespace
+L2 --- extracted models \\
+Three blocking bugs rebuilt as minimal models in the pinned image: the symptom
+reproduces in 3 of 3 trials, the fixed control in 3 of 3, and the runtime
+detector reports a deadlock for one of the three \\
+No: the workload is not the original application \\
+\addlinespace
+L2 --- original applications \\
+The upstream revision rebuilt as the whole application, with the dependency
+compatibility layer pinned in the image \\
+Yes, once measured \\
+\addlinespace
+Extension --- Go 1.21 vs 1.22 \\
+The same bug under two toolchains; the protocol is written, no data yet \\
+Yes, once measured \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 
 \subsection{Level 1: the taxonomy reproduces}
 
@@ -466,7 +511,7 @@ and 40 of 86 non-blocking rows.}
 \label{fig:nontrad}
 \end{figure}
 
-\subsection{Level 2: not yet measured}
+\subsection{Level 2: measured on three extracted models}
 
 The paper reports that Go's built-in deadlock detector fires on 2 of 21
 reproduced blocking bugs (Table~8), and that the race detector fires on 10
@@ -474,11 +519,53 @@ of 20 reproduced non-blocking bugs when each is run 100 times (Table~12).
 The race detector therefore detects exactly half of that sample; it is not
 accurate to say that it misses more than half of it.
 
-We report no detector coverage of our own. The experiment environment is ready
-and measured (Table~\ref{tab:environment}), and the candidate selection and
-the reproducer contract are complete, but no individual bug has been rebuilt
-at its pre-fix revision and triggered yet. Until that is done, quoting a
-coverage figure would be an estimate presented as a measurement.
+We do report a measurement of our own, on three models, and the scope of that
+measurement matters more than its size. The experiment environment is ready and
+measured (Table\ref{tab:environment}); the reproducer contract and the candidate
+selection are complete. Three blocking bugs were rebuilt at their pre-fix revision
+and run in the pinned \texttt{cs340-repro:go1.22} image (Go~1.22.4) on the CI
+runner; the raw per-trial logs are kept under \texttt{repro/} and the measured
+environment under \texttt{results/ci/}.
+
+\begin{center}
+\begin{tabular}{@{}lllll@{}}
+\toprule
+Model & Symptom trials & Fixed controls & Runtime detector report & Buggy status \\
+\midrule
+\texttt{grpc-793}   & 3/3 & 3/3 completed & none & timeout after 10\,s \\
+\texttt{docker-256} & 3/3 & 3/3 completed & none & timeout after 10\,s \\
+\texttt{grpc-1424}  & 3/3 & 3/3 completed & \texttt{deadlock\_reported} & \texttt{deadlock\_reported} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Every trial used the same input for the buggy and the fixed variant, and every
+fixed control returned the expected oracle marker. The runs therefore show that
+the symptom is present in the buggy variant and absent in the fixed one. The
+runtime detector, however, reported a deadlock for only one of the three models.
+
+\textbf{What this does and does not measure.} These are \emph{extracted model}
+runs: they copy the relevant upstream synchronisation out of the original program
+and replace the surrounding application dependencies, which is the only way to
+build these 2016--2018 revisions with Go~1.22 (the pinned upstream revisions
+predate Go modules). In \texttt{grpc-1424} the harness blocks its last goroutine
+in order to observe the missing notification, and that can make the runtime
+report a global deadlock although the original application symptom is a
+goroutine leak. The three observations above therefore \emph{do not} estimate
+the paper's Table~8 coverage, which is measured over complete applications: the
+paper's 2 of 21 blocking and 10 of 20 race-detector results remain figures of
+the paper, not measurements of this team. What the runs do establish is that the
+reproduction harness works end to end --- the symptom reproduces, the fix removes
+it, and the detector's verdict is recorded --- which is the precondition for the
+application-level measurement the next round has to carry out.
+
+The piece that was missing for that step --- a build path for the pre-modules
+upstream revisions --- now exists. The legacy toolchain in
+Table\ref{tab:environment} builds those trees without patching a single line
+of upstream source, and it has already been verified against one of them:
+BoltDB at v1.3.1 compiles in the pinned image. What is still missing is a bug
+that is rebuilt as a whole application and triggered, and that is the remaining
+step for this week.
 
 One discrepancy is already visible in the upstream annotations and is
 recorded now rather than later: the commit-backed inventory marks 19
@@ -516,9 +603,12 @@ Supported for the counts, not extended &
 ~9 and~10 reproduce (Tables~9 and~10 in every cell). We do not assert fix
 quality, because nothing in our data measures it. \\
 3. Built-in detector coverage &
-Inconclusive on our side &
-The paper's 2/21 and 10/20 are established in the paper; our own coverage
-is unmeasured, since no bug has been built and triggered. \\
+Supported in the paper, inconclusive for us &
+The paper's 2/21 and 10/20 are established in the paper. Our own
+measurement covers three extracted models: the symptom reproduces in 3/3
+trials and the fixed control in 3/3, and the runtime detector reports a
+deadlock for one of the three. That sample cannot estimate Table~8 coverage
+over complete applications. \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -672,7 +762,9 @@ What this reproduction cannot demonstrate, stated plainly:
 
 \begin{itemize}
 \item It cannot demonstrate the detector gap (Claim 3). The paper's numbers
-are quoted; ours are unmeasured. No bug has been built and triggered.
+are quoted. Our own measurement covers three extracted models of blocking
+bugs rather than complete applications, so it cannot be compared with the
+paper's Table~8 coverage.
 \item It cannot demonstrate anything about fix \emph{quality}. Our level-1
 data shows which strategy was used for which cause; it cannot show that
 developers misidentified a root cause, that fixes are incomplete, or that
@@ -772,7 +864,8 @@ than claiming the bug class is closed.
 \textbf{Overall verdict: partially reproduced.} The paper's level-1
 statistics are reproduced exactly under the paper's own assignment
 convention, with every difference traced to two documented properties of the
-released dataset, while the level-2 detector measurements and the extension
+released dataset; the level-2 harness now runs end to end on three extracted
+models, while the application-level detector coverage and the extension
 remain unmeasured.
 
 On the first half, the replication succeeds. Over the 169 commit-backed
@@ -797,13 +890,15 @@ bugs is not something a fix-strategy table can show, and the paper's race
 detector detected exactly half of its sample rather than missing more than
 half.
 
-The second half of the programme --- rebuilding the bugs, measuring what
-Go's built-in detectors actually report, and testing the loop-variable
-hypothesis --- is not yet done. The candidate selection, the reproducer
-contract and the environment specification are in place, but no bug has been
-built and triggered and the experiment image is not yet built and verified.
-We therefore report no detector coverage of our own, and the extension is
-stated as a protocol rather than as a finding.
+The second half of the programme is now under way rather than not yet done.
+The environment is built and measured, the reproducer contract is in place, and
+three extracted models have been rebuilt and run end to end: the symptom
+reproduces in 3 of 3 trials, the fixed control in 3 of 3, and the runtime
+detector's verdict is recorded for each model. What is still missing is the
+part that would let those runs be compared with the paper: the models are
+extracted rather than the complete applications, so they cannot yet stand in
+for the paper's Table~8 coverage. The extension is likewise stated as a
+protocol rather than as a finding.
 
 \subsection{Lessons learned}
 
