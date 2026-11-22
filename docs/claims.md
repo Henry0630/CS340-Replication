@@ -220,16 +220,17 @@ executed when this section was written. Raw logs are artifacts of the linked
 recorded in `repro/week2-results.md` and `repro/week3-results.md`.
 
 **Week-three application-level observation (non-canonical host).** The complete
-grpc-go revision for grpc-793 was built in GOPATH mode with Go 1.12.17 and run:
-3/3 buggy trials ended in the Go runtime's `all goroutines are asleep -
-deadlock!` report at `server.go`, and 3/3 fixed controls completed. The
-extracted model re-run under the same Go 1.12.17 toolchain also reported the
-deadlock in 3/3 trials, while the week-two Go 1.22.4 image recorded timeouts
-without a runtime report (see `repro/week3-results.md`). For this bug the
-detector outcome is therefore toolchain-sensitive, and the extracted model did
-not change it when the toolchain was held constant. This is one application-
-level observation, not a coverage estimate: the paper's 2/21 blocking-bug
-detection remains the paper's figure.
+grpc-go revision for grpc-793 was built in GOPATH mode with Go 1.12.17 on
+Windows (`CGO_ENABLED=0`) and run: 3/3 buggy trials ended in the Go runtime's
+`all goroutines are asleep - deadlock!` report at `server.go`, and 3/3 fixed
+controls completed. The extracted model re-run in the same Windows / Go
+1.12.17 / `CGO_ENABLED=0` environment also reported the deadlock in 3/3 trials.
+The week-two extracted-model rows used Go 1.22.4 on Linux with `CGO_ENABLED=1`;
+that cross-week comparison changes the Go version, the operating system and the
+cgo setting together, so the observed difference cannot be attributed to any
+one factor and does not isolate the effect of extraction. This is one
+application-level observation under one environment, not a coverage estimate:
+the paper's 2/21 blocking-bug detection remains the paper's figure.
 
 ## Extension — does Go 1.22 close the loop-variable bug class?
 

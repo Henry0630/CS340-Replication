@@ -23,7 +23,11 @@
   "toolchain": {
     "go": "go1.12.17",
     "image": "cs340-legacy:go1.12",
+    "base_image_ref": "debian:bookworm-slim (tag; no digest pinned in docker/legacy/Dockerfile)",
     "base_image_digest": "debian@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc",
+    "base_image_digest_source": "CI measurement 2026-11-21 in docs/environment.md and results/ci/legacy-20261121T0655Z.md; not locally verified",
+    "runtime_image_id_source": "recorded per trial as container_image_id",
+    "effective_env_record": "build.log and effective-env.txt; copied into runs.jsonl",
     "build_mode": "GOPATH mode, GO111MODULE=off, CGO_ENABLED=1",
     "builder": "../../../docker/legacy"
   },

@@ -13,16 +13,18 @@ Scope: one blocking bug, `grpc-793` (row 79 of the blocking sheet; fixing commit
   body copied out of the same revision.
 
 No number in this document is an estimate: every row below was produced by a
-command and checked in `runs.jsonl`.
+command and checked in its recorded output (`runs.jsonl` for the
+application-level rows; the extracted-model re-run logged one summary line per
+trial, kept with the local evidence under `results/raw/grpc-793/`).
 
 ## Status
 
-The canonical run is the pinned image `cs340-legacy:go1.12` (Go 1.12.17,
-Debian bookworm-slim, `CGO_ENABLED=1`), wired in `.github/workflows/repro.yml`
-as job `grpc-793-app`. **It has not run in this session**: the branch could not
-be pushed from the working machine (no GitHub credentials). What is measured
-below is a local pre-validation on the same Go 1.12.17 release, which is useful
-for validating the scripts but is **not** the pinned-image result.
+The canonical run is configured in `.github/workflows/repro.yml` as job
+`grpc-793-app` and remains **pending**. It uses `cs340-legacy:go1.12` on Linux
+with `CGO_ENABLED=1`. The default build pins Go 1.12.17 and verifies the
+toolchain archive checksum. The Dockerfile selects the Debian base by the
+`debian:bookworm-slim` tag. The measured week-three rows below are local
+Windows pre-validation results.
 
 ## Measured rows
 
@@ -35,7 +37,9 @@ for validating the scripts but is **not** the pinned-image result.
 
 The third row is the week-two measurement copied from
 [`week2-results.md`](week2-results.md); it is the only row produced in the
-pinned Go 1.22.4 image.
+pinned Go 1.22.4 image. Comparing it with the local rows changes the Go
+version, the operating system, and the CGO setting at the same time, so the
+difference cannot be attributed to a single factor.
 
 ## Local pre-validation commands
 
@@ -84,11 +88,14 @@ same trials: buggy 3/3 `deadlock_reported`, fixed 3/3 `completed`, detector 1/1
    builds with Go 1.12.17 once the pre-modules dependency layer is pinned, and
    the second `GracefulStop` call reproduces the deadlock with a runtime stack
    pointing at `server.go` — the same file the upstream fix changes.
-2. **Under the same toolchain, the extracted model did not change the detector
-   outcome for this bug.** Both workloads reported the global deadlock in 3/3
-   trials. The week-two `timeout` without a report is therefore a toolchain /
-   image difference (Go 1.22.4, `CGO_ENABLED=1`, container), not evidence that
-   extraction hides the bug.
+2. **Under the same Windows / Go 1.12.17 / CGO=0 environment the two workloads
+   agree.** Both reported the global deadlock in 3/3 trials, so for this bug the
+   extraction did not change the outcome in that environment. The week-two row
+   changes the Go version (1.22.4 instead of 1.12.17), the operating system
+   (Linux instead of Windows), and the CGO setting (1 instead of 0) at once, and
+   additionally runs in a container; the data cannot identify which factor
+   caused the difference. It is a confounded cross-week comparison, not evidence
+   about extraction alone.
 3. **This is one bug, not coverage.** Nothing here estimates the paper's Table 8
    ratio (2 of 21 blocking bugs detected). The application-level row is a single
    observation; the coverage question stays unmeasured.
@@ -100,24 +107,29 @@ same trials: buggy 3/3 `deadlock_reported`, fixed 3/3 `completed`, detector 1/1
 | Go | 1.22.4 | 1.12.17 | 1.12.17 |
 | OS / kernel | ubuntu-latest (Linux) | Windows/amd64 | Debian bookworm-slim, Linux |
 | `CGO_ENABLED` | 1 | 0 | 1 |
-| image | `cs340-repro:go1.22` | none (host binary) | `cs340-legacy:go1.12`, base `debian@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc` |
+| image | `cs340-repro:go1.22` | none (host binary) | `cs340-legacy:go1.12`, base tag `debian:bookworm-slim`; resolved digest pending |
 | source | extracted `GracefulStop` body | complete `grpc-go@7c6103d` | complete `grpc-go@7c6103d` |
 | dependency layer | none (stdlib only) | `deps.lock` (x/net + protobuf) | `deps.lock` (x/net + protobuf) |
 | container | yes | no | yes |
 
 The local pre-validation differs from the canonical row in OS, cgo, and the
 absence of the container; those differences are recorded rather than assumed
-away.
+away. The week-two row differs from both local rows in Go version, OS and CGO
+simultaneously; no single-factor attribution is claimed. The
+[legacy CI measurement on 2026-11-21](../results/ci/legacy-20261121T0655Z.md)
+recorded `debian@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc`.
+The digest for the pending `grpc-793-app` build still needs to be recorded.
 
 ## Canonical evidence (to be produced by CI)
 
 When `c-repro` is pushed, the `grpc-793-app` job builds
 `docker/legacy/Dockerfile`, runs the three invocations above inside
-`cs340-legacy:go1.12`, and uploads `results/raw/grpc-793/app-*` plus
-`runs.jsonl`, stdout, stderr, stacks, and `build.log` as the
-`week3-grpc-793-application` workflow artifact. That artifact is the canonical
-application-level row; the table above will be updated with its numbers in the
-same follow-up commit.
+`cs340-legacy:go1.12`, and uploads the `week3-grpc-793-application` workflow
+artifact. The artifact keeps only `runs.jsonl`, `build.log`,
+`effective-env.txt`, and the per-trial stdout, stderr, and stack files; the
+staged dependency tree and compiled binaries are not archived. That artifact is
+the canonical application-level row; the table above will be updated with its
+numbers in the same follow-up commit.
 
 ## Deviations
 

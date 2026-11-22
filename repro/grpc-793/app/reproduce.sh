@@ -152,6 +152,7 @@ if [ "${CS340_IN_CONTAINER:-}" != "1" ]; then
         -e CS340_IMAGE_REF="$IMAGE" \
         -e CS340_IMAGE_ID="$IMAGE_ID" \
         -e CS340_BASE_DIGEST="${BASE_DIGEST:-unknown}" \
+        -e CS340_BASE_IMAGE_REF="${CS340_BASE_IMAGE_REF:-debian:bookworm-slim}" \
         -v "$REPO_ROOT:/repo" -w /repo "$IMAGE" \
         bash "repro/grpc-793/app/reproduce.sh" "$@"
 fi
@@ -184,6 +185,7 @@ fi
 IMAGE_REF=${CS340_IMAGE_REF:-unknown}
 IMAGE_ID=${CS340_IMAGE_ID:-unknown}
 BASE_DIGEST=${CS340_BASE_DIGEST:-unknown}
+BASE_IMAGE_REF=${CS340_BASE_IMAGE_REF:-unknown}
 HARNESS_COMMIT=$(git -C "$REPO_ROOT" rev-parse HEAD 2>/dev/null || echo unknown)
 RUN_ID=$(basename -- "$OUT_DIR")
 CHECKOUT_COMMIT=$BUGGY_COMMIT
@@ -199,12 +201,13 @@ BUILD_LOG=$OUT_DIR/build.log
     printf 'variant: %s\n' "$VARIANT"
     printf 'go: %s\n' "$GO_VERSION"
     printf 'goos=%s goarch=%s\n' "$GOOS" "$GOARCH"
-    printf 'GO111MODULE=%s GOPATH=%s\n' "${GO111MODULE:-unset}" "${GOPATH:-unset}"
+    printf 'GO111MODULE=%s GOPATH=%s\n' "$GO111MODULE" 'set by build.sh; see effective-env.txt'
     printf 'CGO_ENABLED=%s GOMAXPROCS=%s\n' "$CGO_ENABLED" "$GOMAXPROCS"
     printf 'gcc: %s\n' "$GCC"
     printf 'uname: %s\n' "$(uname -a 2>/dev/null || echo unknown)"
     printf 'image_ref: %s\n' "$IMAGE_REF"
     printf 'image_id: %s\n' "$IMAGE_ID"
+    printf 'base_image_ref: %s\n' "$BASE_IMAGE_REF"
     printf 'base_image_digest: %s\n' "$BASE_DIGEST"
     printf 'resolved_upstream: grpc-go %s; golang.org/x/net %s; github.com/golang/protobuf %s\n' \
         "$CHECKOUT_COMMIT" "$XNET_COMMIT" "$PROTOBUF_COMMIT"
@@ -219,6 +222,13 @@ fi
 BINARY=$(cat "$OUT_DIR/binary-path" 2>/dev/null || true)
 [ -n "$BINARY" ] || die_setup "build produced no binary path"
 [ -f "$BINARY" ] || die_setup "built binary not found: $BINARY"
+
+EFFECTIVE_ENV=$OUT_DIR/effective-env.txt
+GO111MODULE_EFF=$(grep '^GO111MODULE=' "$EFFECTIVE_ENV" 2>/dev/null | head -1 | cut -d= -f2-)
+GOPATH_EFF=$(grep '^GOPATH=' "$EFFECTIVE_ENV" 2>/dev/null | head -1 | cut -d= -f2-)
+[ -n "$GO111MODULE_EFF" ] || GO111MODULE_EFF=unknown
+[ -n "$GOPATH_EFF" ] || GOPATH_EFF=unknown
+GOPATH_EFF_JSON=${GOPATH_EFF//\\//}
 
 # JSON-safe strings: the local pre-validation host may use backslash paths.
 BINARY_JSON=${BINARY//\\//}
@@ -304,13 +314,14 @@ while [ "$trial" -le "$RUNS" ]; do
         reproduced=$((reproduced + 1))
     fi
 
-    printf '{"schema_version":%d,"bug":"%s","run":%d,"verdict":"%s","wall_s":%s,"candidate_id":"%s","run_id":"%s","trial":%d,"variant":"%s","mode":"%s","repository":"%s","dataset_commit":"%s","checkout_commit":"%s","workload_kind":"%s","harness_commit":"%s","compatibility_patches":%s,"environment":{"go_version":"%s","goos":"%s","goarch":"%s","gomaxprocs":%d,"cgo_enabled":"%s","gotoolchain":"%s","kernel":"%s","gcc":"%s","container_image":"%s","container_image_id":"%s","container_digest":%s,"base_image_digest":"%s"},"command":%s,"started_at_utc":"%s","duration_seconds":%s,"timeout_seconds":%d,"exit_code":%d,"timed_out":%s,"status":"%s","trigger_observed":%s,"detector_detected":%s,"oracle_evidence":"%s","artifacts":{"stdout":"%s","stderr":"%s","stacks":"%s"}}\n' \
+    printf '{"schema_version":%d,"bug":"%s","run":%d,"verdict":"%s","wall_s":%s,"candidate_id":"%s","run_id":"%s","trial":%d,"variant":"%s","mode":"%s","repository":"%s","dataset_commit":"%s","checkout_commit":"%s","workload_kind":"%s","harness_commit":"%s","compatibility_patches":%s,"environment":{"go_version":"%s","goos":"%s","goarch":"%s","gomaxprocs":%d,"cgo_enabled":"%s","gotoolchain":"%s","go111module":"%s","gopath":"%s","kernel":"%s","gcc":"%s","base_image_ref":"%s","container_image":"%s","container_image_id":"%s","container_digest":%s,"base_image_digest":"%s"},"command":%s,"started_at_utc":"%s","duration_seconds":%s,"timeout_seconds":%d,"exit_code":%d,"timed_out":%s,"status":"%s","trigger_observed":%s,"detector_detected":%s,"oracle_evidence":"%s","artifacts":{"stdout":"%s","stderr":"%s","stacks":"%s"}}\n' \
         "$SCHEMA_VERSION" "$CANDIDATE_ID" "$trial" "$status" "$duration" \
         "$CANDIDATE_ID" "$RUN_ID" "$trial" "$VARIANT" "$MODE" \
         "$REPOSITORY" "$DATASET_COMMIT" "$CHECKOUT_COMMIT" "$WORKLOAD_KIND" \
         "$HARNESS_COMMIT" "$COMPAT_PATCHES" \
         "$GO_VERSION" "$GOOS" "$GOARCH" "$GOMAXPROCS" "$CGO_ENABLED" "$GOTOOLCHAIN" \
-        "$KERNEL_JSON" "$GCC_JSON" "$IMAGE_REF" "$IMAGE_ID" "$CONTAINER_DIGEST" "$BASE_DIGEST" \
+        "$GO111MODULE_EFF" "$GOPATH_EFF_JSON" \
+        "$KERNEL_JSON" "$GCC_JSON" "$BASE_IMAGE_REF" "$IMAGE_REF" "$IMAGE_ID" "$CONTAINER_DIGEST" "$BASE_DIGEST" \
         "$COMMAND" "$started_utc" "$duration" "$TIMEOUT" "$child_rc" \
         "$([ "$status" = "timeout" ] && echo true || echo false)" \
         "$status" "$trigger_observed" "$detector_detected" "$oracle_evidence" \

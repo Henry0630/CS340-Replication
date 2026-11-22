@@ -35,23 +35,45 @@ returned`.
 ## Build path and compatibility layer
 
 - Image: `docker/legacy` (B's environment work), Go 1.12.17 in GOPATH mode,
-  `GO111MODULE=off`, `CGO_ENABLED=1`, base image
-  `debian@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc`.
+  `GO111MODULE=off`, `CGO_ENABLED=1`, base image reference
+  `debian:bookworm-slim` (tag; the recorded digest and its verification state
+  are in "Image reference and digest" below).
 - The 2016 grpc-go tree has no `go.mod` and no `vendor/` directory, so the
   dependency layer is reconstructed in a fresh GOPATH by `build.sh` from
   `deps.lock`: `golang.org/x/net` and `github.com/golang/protobuf` are pinned to
   commits from the same period. Every fetch is by commit SHA and checked with
   `git rev-parse HEAD`; no upstream source file is edited and no patch is
   applied.
-- The Go toolchain is older than the original developers used (the bug is from
-  2016) but is the newest pre-modules toolchain the pinned image supports; the
-  exact compiler is recorded with every trial in `runs.jsonl`.
+- Go 1.12.17 is newer than the toolchains the upstream grpc-go CI used when the
+  bug was current (Go 1.5.4 and 1.6.3 in the 2016 `.travis.yml`), but it is still
+  a pre-modules toolchain, which these trees require. The exact compiler is
+  recorded with every trial in `runs.jsonl`.
+
+## Image reference and digest
+
+- `docker/legacy/Dockerfile` uses `FROM debian:bookworm-slim` — a tag, not a
+  digest. `docs/environment.md` and the CI measurement in
+  `results/ci/legacy-20261121T0655Z.md` record
+  `debian@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc`
+  from the 2026-11-21 build.
+- The shared Dockerfile still uses the tag. The digest above applies to the
+  historical CI build. The canonical run must record the base image digest
+  resolved for its own build.
+- The base image digest and the runtime image ID are different values: the
+  digest identifies `debian:bookworm-slim`, while `container_image_id` in
+  `runs.jsonl` identifies the built `cs340-legacy:go1.12` image used for that
+  trial.
 
 ## Local pre-validation (non-canonical)
 
 A first end-to-end run was executed on the working machine, which has no Docker:
-Windows/amd64, Go 1.12.17, `CGO_ENABLED=0`, GOPATH mode. It is recorded here as
-a pre-validation only; it is **not** the pinned-image result.
+Windows/amd64, Go 1.12.17, `CGO_ENABLED=0`, GOPATH mode. The results below are
+local pre-validation. `build.sh` records `GO111MODULE`, `GOPATH`, `GOROOT` and
+`CGO_ENABLED` in `build.log` and `effective-env.txt`. New `runs.jsonl` rows
+include `environment.go111module`, `environment.gopath` and the existing
+`environment.cgo_enabled` field. `GOROOT` is recorded only in the two build
+logs. The existing pre-validation rows predate the `go111module` and `gopath`
+fields.
 
 | Variant | Trials | Observed |
 |---|---:|---|
@@ -59,28 +81,28 @@ a pre-validation only; it is **not** the pinned-image result.
 | fixed | 3/3 | `completed` with the `ORACLE:` marker |
 | buggy detector trial | 1/1 | `deadlock_reported` (detector fired) |
 
-The pinned-image run is wired in `.github/workflows/repro.yml` (job
-`grpc-793-app`) but had not run when this commit was prepared: this session has
-no credentials to push the branch. `repro/week3-results.md` records the
-non-canonical results separately and lists the canonical run as pending.
+The canonical Linux container run is configured in `.github/workflows/repro.yml`
+(job `grpc-793-app`). `repro/week3-results.md` records the local results
+separately and lists the canonical run as pending.
 
 ## Relation to the extracted model
 
 `../README.md` and `../notes.md` describe the week-two extracted model of the
-same bug (Go 1.22, no upstream tree). Under the week-two toolchain that model
-timed out without a runtime deadlock report; under Go 1.12.17 (this workload's
-toolchain) the model reports the same global deadlock as the complete
-application. The detector outcome therefore depends on the toolchain, not on
-whether the code is extracted; this workload does not estimate the paper's
-Table 8 coverage.
+same bug. Under the same Windows / Go 1.12.17 / `CGO_ENABLED=0` environment the
+extracted model reported the same global deadlock as the complete application
+(3/3). The week-two CI rows differ in Go version, operating system and cgo
+setting **and** workload; because those factors change together, the comparison
+cannot show which one produced the difference, and it is not evidence that
+extraction hides the bug. This workload does not estimate the paper's Table 8
+coverage.
 
 ## Limitations
 
 - One bug only. This is an application-level observation for grpc-793, not an
   estimate of application-level detector coverage for the paper's 21 blocking
   bugs.
-- The local pre-validation host is not the pinned image; its results are
-  labeled non-canonical everywhere they appear.
+- The local pre-validation results apply to the Windows host. The canonical
+  Linux container run remains pending.
 - `CGO_ENABLED=1` in the image, `0` on the pre-validation host; the bug is pure
   Go synchronization and does not involve cgo, but the setting is recorded in
   every JSONL row.

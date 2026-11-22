@@ -191,5 +191,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: week3-grpc-793-application
-          path: results/raw/grpc-793/app-*
+          path: |
+            results/raw/grpc-793/app-*/runs.jsonl
+            results/raw/grpc-793/app-*/build.log
+            results/raw/grpc-793/app-*/effective-env.txt
+            results/raw/grpc-793/app-*/run-*.stdout
+            results/raw/grpc-793/app-*/run-*.stderr
+            results/raw/grpc-793/app-*/run-*.stacks
           if-no-files-found: warn

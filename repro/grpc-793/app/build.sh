@@ -69,6 +69,17 @@ case "$(uname -s 2>/dev/null)" in
 esac
 export GOPATH=$GOPATH_WIN
 
+EFFECTIVE_ENV=$OUT/effective-env.txt
+{
+    echo "GO111MODULE=$GO111MODULE"
+    echo "GOPATH=$GOPATH"
+    echo "GOROOT=$(go env GOROOT 2>/dev/null || echo unknown)"
+    echo "CGO_ENABLED=$CGO_ENABLED"
+    echo "GOMAXPROCS=$GOMAXPROCS"
+    echo "go=$GO_VERSION_LINE"
+} > "$EFFECTIVE_ENV"
+cat "$EFFECTIVE_ENV"
+
 fetch_pinned() { # import-path repository commit
     local import_path=$1 repository=$2 commit=$3
     local dest=$SRC_DIR/$import_path

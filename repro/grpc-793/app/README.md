@@ -38,6 +38,9 @@ the compatibility layer.
   `docker build -f docker/legacy/Dockerfile -t cs340-legacy:go1.12 .`
 - Inside the image: Go 1.12.17, `GO111MODULE=off`, `CGO_ENABLED=1`, git, gcc.
 - Network access for the pinned dependency fetch in `build.sh`.
+- The Dockerfile references `debian:bookworm-slim` by tag. The digest recorded
+  in `docs/environment.md` is a CI measurement; this workload does not treat it
+  as locally verified.
 
 ## Commands
 
@@ -65,14 +68,16 @@ by calling the script from the host).
   deadlock (`deadlock_reported`, exit 2) or the external 10 s watchdog may fire
   (`timeout`, exit 124); both count as the documented symptom. The SIGQUIT stack
   is saved in `run-00N.stacks`.
-- `fixed`: all three calls return; the runner records `completed` and the fixed
-  control passes.
+- `fixed`: both `GracefulStop` calls return in every trial (three trials); the
+  runner records `completed` and the fixed control passes.
 - Detector trial: records whether Go's built-in deadlock detector fired; the
   runner returns 0 whether or not it fired.
 
-Output goes to `<output>/build.log`, `run-00N.stdout`, `run-00N.stderr`,
-`run-00N.stacks`, `binary-path`, and `runs.jsonl`, as required by
-[`repro/README.md`](../README.md).
+Output goes to `<output>/build.log`, `<output>/effective-env.txt`,
+`run-00N.stdout`, `run-00N.stderr`, `run-00N.stacks`, `binary-path`, and
+`runs.jsonl`, as required by [`repro/README.md`](../README.md). The CI artifact
+keeps only `runs.jsonl`, `build.log`, `effective-env.txt`, and the per-trial
+stdout/stderr/stacks; the staged GOPATH and compiled binaries are not archived.
 
 ## Evidence and limitations
 
