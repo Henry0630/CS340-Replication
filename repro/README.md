@@ -153,3 +153,19 @@ models (`workload_kind: extracted_model`), reported separately from
 whole-application reproduction; these runs do not claim the paper's Table 8 or
 Table 12 results. The first Docker-based run passed all three 3/3 qualifications;
 see [the measured results](week2-results.md).
+
+## Week-three status
+
+The first **application-level** workload (`workload_kind: original_application`)
+now exists under [`grpc-793/app/`](grpc-793/app): it builds the complete
+upstream grpc-go revision in the pinned legacy image (`docker/legacy`, Go
+1.12.17) and calls `GracefulStop()` twice on a real server. Its runner, metadata,
+dependency lock, and notes follow the contract above. A local pre-validation
+(Go 1.12.17, non-canonical host) reproduced the buggy symptom 3/3, completed the
+fixed control 3/3, and fired the runtime detector; the extracted model under the
+same toolchain behaves the same in those runs, while the week-two Go 1.22.4
+image had recorded timeouts. The canonical pinned-image run is wired in
+`.github/workflows/repro.yml` (job `grpc-793-app`) and is **pending**; the
+side-by-side table and environment differences are in
+[`week3-results.md`](week3-results.md). These are one-bug observations, not
+Table 8 coverage.
