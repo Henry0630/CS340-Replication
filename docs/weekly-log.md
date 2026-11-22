@@ -1,5 +1,3 @@
-# Weekly log
-
 One row per commit that matters. This file is the evidence behind the
 contribution statement in the report: the assistant/TA reads `git log` and
 this table together, so every line here must correspond to a real commit.
@@ -48,15 +46,9 @@ this table together, so every line here must correspond to a real commit.
 | 2 | 2026-11-15 | 郭子嘉 (D) | `docs: align the weekly log with the commit subjects` | Contribution Statement |
 | 2 | 2026-11-14 | Henry0630 (repo owner) | `Update team members in README.md` | Team division |
 | 2 | 2026-11-14 | Henry0630 (repo owner) | `Update 郭子嘉's ID in README.md` | Team division |
-| 3 | 2026-11-21 | 郭子嘉 (D) | `meta: merge C's week-two reproducers into main` | — |
-| 3 | 2026-11-21 | 郭子嘉 (D) | `meta: merge A's cell-by-cell verification into main` | Deviations |
-| 3 | 2026-11-21 | 郭子嘉 (D) | `meta: normalise line endings of the merged deviation notes` | — |
-| 3 | 2026-11-21 | 郭子嘉 (D) | `report: fold the measured week-two reproducer results into the report` | Results, Analysis of Discrepancies |
-| 3 | 2026-11-21 | 郭子嘉 (D) | `docs: add the week-three plan and update the weekly log` | Contribution Statement |
-| 3 | 2026-11-21 | 郭子嘉 (D) | `report: add the evidence-by-layer table to the results` | Results |
-| 3 | 2026-11-21 | 郭子嘉 (D) | `meta: wire the dataset regression suite into make test` | — |
-| 3 | 2026-11-21 | 郭子嘉 (D) | `report: record the pinned legacy toolchain in the environment table` | Reproduction Setup |
-
+| 2 | 2026-11-14 | 辛相天 (A) | `dataset: verify all recomputed tables cell by cell against paper` | Tables, Deviations |
+| 2 | 2026-11-15 | 辛相天 (A) | `dataset: add deviations table and BoltDB gap analysis` | Deviations |
+| 3 | 2026-11-22 | 辛相天 (A) | `dataset: verify all recomputed tables cell by cell and add extracted model note` | Tables, Deviations |
 
 
 ### Completeness note
@@ -77,4 +69,5 @@ measured environment block that B's `env:` commits produce.
 One commit is necessarily absent from this table: the commit that
 appends this note. A row cannot describe its own commit, so the last
 row always refers to the commit before it.
+
 
