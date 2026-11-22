@@ -19,6 +19,7 @@
   "buggy_checkout_commit": "7c6103d142da5fd11a36964c3a42cf698056b00b",
   "source_file": "server.go",
   "workload_kind": "extracted_model",
+  "application_workload": "app/metadata.json",
   "modes": ["symptom", "deadlock"],
   "symptom": "the second GracefulStop call blocks forever on a double mutex lock",
   "expected_buggy_status": ["deadlock_reported", "timeout"],
