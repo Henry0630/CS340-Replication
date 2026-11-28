@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "candidate_id": "grpc-793",
+  "workload_kind": "original_application",
+  "repository": "https://github.com/grpc/grpc-go",
+  "bug_id": "grpc/grpc-go#793",
+  "dataset": {
+    "upstream_commit": "f2655063a2278cff64a51121b73801eda05fdcfa",
+    "source_sheet": "blocking",
+    "source_row": 79,
+    "dataset_commit": "5a547ed72c09faf4050739d54caea1d51f4d276d",
+    "reproduced_flag": 1,
+    "patch_size_lines": 1,
+    "shared_memory": 1,
+    "message_passing": 0,
+    "cause_labels": ["Mutex"],
+    "fix_labels": ["Change"]
+  },
+  "fixing_commit": "5a547ed72c09faf4050739d54caea1d51f4d276d",
+  "buggy_checkout_commit": "7c6103d142da5fd11a36964c3a42cf698056b00b",
+  "fixed_checkout_commit": "5a547ed72c09faf4050739d54caea1d51f4d276d",
+  "source_file": "server.go",
+  "toolchain": {
+    "go": "go1.12.17",
+    "image": "cs340-legacy:go1.12",
+    "base_image_ref": "debian:bookworm-slim (tag; no digest pinned in docker/legacy/Dockerfile)",
+    "base_image_digest": "debian@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc",
+    "base_image_digest_source": "CI measurement 2026-11-21 in docs/environment.md and results/ci/legacy-20261121T0655Z.md; not locally verified",
+    "runtime_image_id_source": "recorded per trial as container_image_id",
+    "effective_env_record": "build.log and effective-env.txt; copied into runs.jsonl",
+    "build_mode": "GOPATH mode, GO111MODULE=off, CGO_ENABLED=1",
+    "builder": "../../../docker/legacy"
+  },
+  "dependencies": [
+    {
+      "import_path": "google.golang.org/grpc",
+      "repository": "https://github.com/grpc/grpc-go.git",
+      "buggy_commit": "7c6103d142da5fd11a36964c3a42cf698056b00b",
+      "fixed_commit": "5a547ed72c09faf4050739d54caea1d51f4d276d"
+    },
+    {
+      "import_path": "golang.org/x/net",
+      "repository": "https://github.com/golang/net.git",
+      "commit": "6a513affb38dc9788b449d59ffed099b8de18fa0"
+    },
+    {
+      "import_path": "github.com/golang/protobuf",
+      "repository": "https://github.com/golang/protobuf.git",
+      "commit": "c3cefd437628a0b7d31b34fe44b3a7a540e98527"
+    }
+  ],
+  "modes": ["symptom", "deadlock"],
+  "symptom": "the second GracefulStop call blocks forever on a repeated mutex lock in (*Server).GracefulStop",
+  "expected_buggy_status": ["deadlock_reported", "timeout"],
+  "expected_fixed_status": ["completed"],
+  "requires_linux": true,
+  "runner": "reproduce.sh",
+  "notes": "notes.md"
+}

@@ -109,3 +109,93 @@ jobs:
           name: repro-${{ matrix.candidate }}
           path: results/raw/${{ matrix.candidate }}/
           if-no-files-found: warn
+
+  # ---------------------------------------------------------------------------
+  # Week three: the same blocking bug built from the complete upstream
+  # revision, inside the pinned legacy toolchain (docker/legacy, Go 1.12.17).
+  # This is the application-level row that the extracted-model jobs above
+  # cannot provide.
+  grpc-793-app:
+    name: repro-grpc-793-application
+    runs-on: ubuntu-22.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the legacy toolchain image
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker pull debian:bookworm-slim
+          docker build -f docker/legacy/Dockerfile -t cs340-legacy:go1.12 .
+          docker run --rm cs340-legacy:go1.12 go version | tee go-version.txt
+          grep -q "go1.12.17" go-version.txt
+      - name: Buggy variant, three trials
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash repro/grpc-793/app/reproduce.sh \
+            --variant buggy --mode symptom --runs 3 --timeout 10 \
+            --output results/raw/grpc-793/app-buggy
+      - name: Detector trial
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash repro/grpc-793/app/reproduce.sh \
+            --variant buggy --mode deadlock --runs 1 --timeout 10 \
+            --output results/raw/grpc-793/app-detector
+      - name: Fixed control, three trials
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash repro/grpc-793/app/reproduce.sh \
+            --variant fixed --mode symptom --runs 3 --timeout 10 \
+            --output results/raw/grpc-793/app-fixed
+      - name: Verify application-level evidence
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+
+          def rows(path):
+              with open(path, encoding="utf-8") as handle:
+                  return [json.loads(line) for line in handle if line.strip()]
+
+          buggy = rows("results/raw/grpc-793/app-buggy/runs.jsonl")
+          if len(buggy) != 3:
+              raise SystemExit("expected 3 buggy trials, got %d" % len(buggy))
+          for row in buggy:
+              if row["workload_kind"] != "original_application":
+                  raise SystemExit("wrong workload_kind: %r" % row["workload_kind"])
+              if row["trigger_observed"] is not True:
+                  raise SystemExit("buggy trial did not observe the trigger: %r" % row)
+              if row["status"] not in ("deadlock_reported", "timeout"):
+                  raise SystemExit("unexpected buggy status: %r" % row["status"])
+
+          detector = rows("results/raw/grpc-793/app-detector/runs.jsonl")
+          if len(detector) != 1 or detector[0]["trigger_observed"] is not True:
+              raise SystemExit("detector trial did not observe the trigger: %r" % detector)
+          print("application detector_detected=%r (recorded, not gated)"
+                % detector[0]["detector_detected"])
+
+          fixed = rows("results/raw/grpc-793/app-fixed/runs.jsonl")
+          if len(fixed) != 3:
+              raise SystemExit("expected 3 fixed trials, got %d" % len(fixed))
+          for row in fixed:
+              if row["status"] != "completed":
+                  raise SystemExit("fixed control did not complete: %r" % row)
+
+          print("grpc-793 application: buggy 3/3, detector 1/1, fixed control 3/3")
+          PY
+      - name: Upload application-level evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: week3-grpc-793-application
+          path: |
+            results/raw/grpc-793/app-*/runs.jsonl
+            results/raw/grpc-793/app-*/build.log
+            results/raw/grpc-793/app-*/effective-env.txt
+            results/raw/grpc-793/app-*/run-*.stdout
+            results/raw/grpc-793/app-*/run-*.stderr
+            results/raw/grpc-793/app-*/run-*.stacks
+          if-no-files-found: warn

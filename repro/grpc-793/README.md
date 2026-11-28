@@ -69,3 +69,13 @@ Output goes to `<output>/build.log`, `run-00N.stdout`, `run-00N.stderr`,
 The trigger is deterministic and in-process. [notes.md](notes.md) records the
 model extraction, the substitutions, and why the result is not application
 detector coverage.
+
+## Week-three application workload
+
+[`app/`](app/) is the complete-upstream-application variant of this candidate
+(`workload_kind: original_application`): it builds the real grpc-go tree at
+`7c6103d142da5fd11a36964c3a42cf698056b00b` inside the pinned legacy image
+(`docker/legacy`, Go 1.12.17), calls `GracefulStop()` twice, and has its own
+`reproduce.sh`, `metadata.json`, `deps.lock`, and notes. The side-by-side
+comparison with this extracted model, including the toolchain/environment
+differences, is in [`../../week3-results.md`](../../week3-results.md).

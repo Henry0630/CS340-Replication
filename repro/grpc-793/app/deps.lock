@@ -1,0 +1,19 @@
+# Pinned dependency layer for the grpc-793 application-level workload.
+#
+# Format: <import-path>  <repository>  <commit>  <resolved date>  <reason>
+#
+# build.sh fetches each commit by SHA into a fresh GOPATH and verifies
+# `git rev-parse HEAD`; no upstream file is edited after checkout.
+# The commits are the dependency state around the grpc-go revision date
+# (2016-07-29); they are recorded here because grpc-go predates Go modules and
+# has no vendor directory.
+
+google.golang.org/grpc       https://github.com/grpc/grpc-go.git    7c6103d142da5fd11a36964c3a42cf698056b00b  2016-07-29  buggy checkout (pre-fix)
+google.golang.org/grpc       https://github.com/grpc/grpc-go.git    5a547ed72c09faf4050739d54caea1d51f4d276d  2016-07-29  fixed control (fixing commit, merge of PR #795)
+golang.org/x/net             https://github.com/golang/net.git      6a513affb38dc9788b449d59ffed099b8de18fa0  2016-07-26  context, http2, http2/hpack, trace
+github.com/golang/protobuf   https://github.com/golang/protobuf.git c3cefd437628a0b7d31b34fe44b3a7a540e98527  2016-07-27  proto
+
+# Not required for this workload (checked by building without them):
+#   golang.org/x/text, golang.org/x/oauth2, github.com/golang/glog
+# They are imported only by packages the workload does not compile
+# (benchmark, stress, credentials/oauth, tests).
